@@ -12,7 +12,8 @@ export const STORAGE_KEYS = {
   USERS: 'ubos_users',
   BOTS: 'ubos_bots',
   BOT_SETTINGS: 'ubos_bot_settings',
-  CHAT_HISTORY: 'ubos_chat_history'
+  CHAT_HISTORY: 'ubos_chat_history',
+  CREDITS: 'ubos_credits'
 };
 
 /**

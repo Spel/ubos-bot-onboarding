@@ -97,9 +97,9 @@ export default function MyBots() {
   return (
     <div className={`min-h-screen ${darkMode ? 'bg-neutral-900' : 'bg-gray-50'}`}>
       <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-      <div className="flex h-[calc(100vh-61px)]">
-        <Sidebar darkMode={darkMode} />
-        <main className="flex-1 overflow-y-auto p-4 max-w-[calc(100vw-260px)] ml-auto">
+      <Sidebar darkMode={darkMode} />
+      <div style={{ paddingLeft: '16rem', paddingTop: '61px' }}>
+        <main className="w-full overflow-y-auto p-4">
           {/* Page Header */}
           <div className="flex justify-between items-center mb-6">
             <div>

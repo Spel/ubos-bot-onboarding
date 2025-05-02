@@ -2,11 +2,11 @@ import React from "react";
 
 export default function Header({ darkMode, toggleDarkMode }) {
   return (
-    <header className={`sticky top-0 inset-x-0 flex flex-wrap md:justify-start md:flex-nowrap z-48 w-full border-b py-2.5 lg:ps-64 ${
+    <header className={`fixed top-0 right-0 flex flex-wrap md:justify-start md:flex-nowrap z-40 border-b py-2.5 lg:ml-64 ${
       darkMode 
         ? 'bg-neutral-900 border-neutral-800 text-white' 
         : 'bg-white border-gray-200 text-gray-800'
-    }`}>
+    }`} style={{ width: 'calc(100% - 16rem)' }}>
       <nav className="px-4 sm:px-6 flex basis-full items-center w-full mx-auto">
         <div className="me-5 lg:me-0 lg:hidden flex items-center">
           {/* Mobile Logo */}

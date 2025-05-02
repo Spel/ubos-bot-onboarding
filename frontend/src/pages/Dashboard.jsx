@@ -3,9 +3,11 @@ import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import { saveToStorage, getFromStorage, STORAGE_KEYS } from "../utils/localStorage";
 import { getBotCount, getActiveBotCount, getBotsByType } from "../utils/botsData";
+import { Link } from "react-router-dom";
 
 export default function Dashboard() {
   const [darkMode, setDarkMode] = useState(getFromStorage(STORAGE_KEYS.DARK_MODE, false));
+  const [credits, setCredits] = useState(getFromStorage(STORAGE_KEYS.CREDITS, 2592000)); // Default to 2,592,000 TPU-seconds
   
   // Toggle dark mode function
   const toggleDarkMode = () => {
@@ -38,7 +40,17 @@ export default function Dashboard() {
   const [activeBotCount, setActiveBotCount] = useState(0);
   const [botTypes, setBotTypes] = useState({});
 
-  // Load bot statistics
+  // Format credits in a readable way
+  const formatCredits = (tpuSeconds) => {
+    if (tpuSeconds >= 1000000) {
+      return `${(tpuSeconds / 1000000).toFixed(2)}M`;
+    } else if (tpuSeconds >= 1000) {
+      return `${(tpuSeconds / 1000).toFixed(1)}K`;
+    }
+    return tpuSeconds.toString();
+  };
+
+  // Load bot statistics and credits
   useEffect(() => {
     const totalBots = getBotCount();
     const activeBots = getActiveBotCount();
@@ -50,17 +62,21 @@ export default function Dashboard() {
     types.sales = getBotsByType('sales').length;
     types.content = getBotsByType('content').length;
     
+    // Get credits
+    const userCredits = getFromStorage(STORAGE_KEYS.CREDITS, 2592000);
+    
     setBotCount(totalBots);
     setActiveBotCount(activeBots);
     setBotTypes(types);
+    setCredits(userCredits);
   }, []);
 
   return (
     <div className={`min-h-screen ${darkMode ? 'bg-neutral-900' : 'bg-gray-50'}`}>
       <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-      <div className="flex h-[calc(100vh-61px)]">
-        <Sidebar darkMode={darkMode} />
-        <main className="flex-1 overflow-y-auto p-4 max-w-[calc(100vw-260px)] ml-auto">
+      <Sidebar darkMode={darkMode} />
+      <div style={{ paddingLeft: '16rem', paddingTop: '61px' }}>
+        <main className="w-full overflow-y-auto p-4">
           {/* Dashboard Header */}
           <div className="mb-6">
             <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Dashboard</h1>
@@ -127,15 +143,74 @@ export default function Dashboard() {
             </div>
           </div>
 
+          {/* Credits Usage Section */}
+          <div className="mb-6">
+            <h2 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Credits Usage</h2>
+            <div className={`${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'} border rounded-xl shadow-sm p-6`}>
+              <div className="flex flex-col">
+                <div className="flex justify-between items-center mb-2">
+                  <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>TPU-Seconds Available</span>
+                  <span className={`text-sm font-medium ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                    {formatCredits(credits)} / 2.59M
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mb-4">
+                  <div 
+                    className="bg-blue-600 h-2.5 rounded-full" 
+                    style={{ width: `${Math.min(100, (credits / 2592000) * 100)}%` }}
+                  ></div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+                  <div className={`p-4 rounded-lg ${darkMode ? 'bg-neutral-700' : 'bg-gray-100'}`}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className={`text-xs font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Usage Today</span>
+                      <span className={`text-xs font-medium ${darkMode ? 'text-green-400' : 'text-green-600'}`}>2.1K</span>
+                    </div>
+                    <div className="w-full bg-gray-300 rounded-full h-1.5 dark:bg-gray-600">
+                      <div className="bg-green-500 h-1.5 rounded-full" style={{ width: '15%' }}></div>
+                    </div>
+                  </div>
+                  
+                  <div className={`p-4 rounded-lg ${darkMode ? 'bg-neutral-700' : 'bg-gray-100'}`}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className={`text-xs font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>This Week</span>
+                      <span className={`text-xs font-medium ${darkMode ? 'text-yellow-400' : 'text-yellow-600'}`}>12.5K</span>
+                    </div>
+                    <div className="w-full bg-gray-300 rounded-full h-1.5 dark:bg-gray-600">
+                      <div className="bg-yellow-500 h-1.5 rounded-full" style={{ width: '35%' }}></div>
+                    </div>
+                  </div>
+                  
+                  <div className={`p-4 rounded-lg ${darkMode ? 'bg-neutral-700' : 'bg-gray-100'}`}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className={`text-xs font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>This Month</span>
+                      <span className={`text-xs font-medium ${darkMode ? 'text-purple-400' : 'text-purple-600'}`}>86.4K</span>
+                    </div>
+                    <div className="w-full bg-gray-300 rounded-full h-1.5 dark:bg-gray-600">
+                      <div className="bg-purple-500 h-1.5 rounded-full" style={{ width: '65%' }}></div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-4 flex justify-end">
+                  <Link to="#" className={`text-sm ${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}>
+                    View detailed usage →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+          
           {/* Recent Activity Section */}
           <div className="mb-6">
             <h2 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Recent Activity</h2>
             <div className={`${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'} border rounded-xl shadow-sm p-4`}>
               <div className={`text-center py-10 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                 <p>Your bot activity will appear here</p>
-                <button className={`mt-2 py-2 px-4 rounded-lg ${darkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} text-white transition-colors`}>
+                <Link to="/onboarding" className={`inline-block mt-2 py-2 px-4 rounded-lg ${darkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} text-white transition-colors`}>
                   Create New Bot
-                </button>
+                </Link>
               </div>
             </div>
           </div>
