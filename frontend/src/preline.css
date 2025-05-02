@@ -1,0 +1,111 @@
+/* Preline CSS */
+@import url('https://preline.co/assets/css/main.min.css');
+
+/* Additional styles for Preline components */
+.hs-overlay {
+  z-index: 60;
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  transition-property: visibility, opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
+}
+
+.hs-overlay-open {
+  visibility: visible;
+  opacity: 1;
+}
+
+.hs-overlay-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 50;
+}
+
+/* Light theme styles */
+.bg-white {
+  background-color: white !important;
+}
+
+.text-white {
+  color: white !important;
+}
+
+.bg-blue-600 {
+  background-color: #2563eb !important;
+}
+
+.text-blue-600 {
+  color: #2563eb !important;
+}
+
+.border-gray-100 {
+  border-color: #f3f4f6 !important;
+}
+
+.text-gray-600 {
+  color: #4b5563 !important;
+}
+
+.bg-gray-50 {
+  background-color: #f9fafb !important;
+}
+
+.border-gray-200 {
+  border-color: #e5e7eb !important;
+}
+
+.text-gray-800 {
+  color: #1f2937 !important;
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.shadow-2xs {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+.rounded-xl {
+  border-radius: 0.75rem !important;
+}
+
+.rounded-lg {
+  border-radius: 0.5rem !important;
+}
+
+.font-semibold {
+  font-weight: 600 !important;
+}
+
+.font-medium {
+  font-weight: 500 !important;
+}
+
+/* Dark theme styles */
+.dark .bg-neutral-800 {
+  background-color: #262626 !important;
+}
+
+.dark .border-neutral-700 {
+  border-color: #404040 !important;
+}
+
+.dark .text-neutral-200 {
+  color: #e5e5e5 !important;
+}
+
+.dark .text-neutral-400 {
+  color: #a3a3a3 !important;
+}
+
+.dark .text-neutral-500 {
+  color: #737373 !important;
+}
+
+/* Fix for Preline components */
+[data-hs-overlay] {
+  display: block !important;
+}
