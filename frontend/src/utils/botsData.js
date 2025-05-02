@@ -13,7 +13,7 @@ const sampleBots = [
     type: 'support',
     avatar: '🤖',
     domain: 'support.ubos.bot',
-    url: '/bot/support'
+    url: '/bot/customer-support-bot'
   },
   {
     id: '2',
@@ -24,7 +24,7 @@ const sampleBots = [
     type: 'sales',
     avatar: '🤑',
     domain: 'sales.ubos.bot',
-    url: '/bot/sales'
+    url: '/bot/sales-assistant'
   },
   {
     id: '3',
@@ -35,7 +35,7 @@ const sampleBots = [
     type: 'content',
     avatar: '✍️',
     domain: 'content.ubos.bot',
-    url: '/bot/content'
+    url: '/bot/content-creator'
   }
 ];
 
@@ -43,13 +43,34 @@ const sampleBots = [
 export const getBots = () => {
   const bots = getFromStorage(STORAGE_KEYS.BOTS, null);
   console.log('Retrieved bots from storage:', bots);
+  
   if (!bots) {
     // Initialize with sample data if no bots exist
     console.log('No bots found, initializing with sample data');
     saveToStorage(STORAGE_KEYS.BOTS, sampleBots);
     return sampleBots;
   }
-  return bots;
+  
+  // Ensure all bots have proper URLs and domains
+  const updatedBots = bots.map(bot => {
+    if (!bot.url || !bot.domain) {
+      const botNameSlug = bot.name.toLowerCase().replace(/\s+/g, '-');
+      return {
+        ...bot,
+        domain: bot.domain || `${bot.name.toLowerCase().replace(/\s+/g, '')}.ubos.bot`,
+        url: bot.url || `/bot/${botNameSlug}`
+      };
+    }
+    return bot;
+  });
+  
+  // Save updated bots if any changes were made
+  if (JSON.stringify(bots) !== JSON.stringify(updatedBots)) {
+    console.log('Updating bots with proper URLs and domains');
+    saveToStorage(STORAGE_KEYS.BOTS, updatedBots);
+  }
+  
+  return updatedBots;
 };
 
 // Get a single bot by ID

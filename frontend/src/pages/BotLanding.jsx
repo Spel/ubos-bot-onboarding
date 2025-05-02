@@ -14,11 +14,26 @@ export default function BotLanding() {
   // Load bot data
   useEffect(() => {
     const bots = getFromStorage(STORAGE_KEYS.BOTS, []);
-    const foundBot = bots.find(b => {
-      // Match by URL path segment
+    
+    // First try to find by URL path
+    let foundBot = bots.find(b => {
+      if (!b.url) return false;
       const urlPath = b.url.split('/').pop();
       return urlPath === botId;
     });
+    
+    // If not found by URL, try to find by name slug
+    if (!foundBot) {
+      foundBot = bots.find(b => {
+        const nameSlug = b.name?.toLowerCase().replace(/\s+/g, '-');
+        return nameSlug === botId;
+      });
+    }
+    
+    // If still not found, try to find by ID
+    if (!foundBot) {
+      foundBot = bots.find(b => b.id === botId);
+    }
     
     if (foundBot) {
       setBot(foundBot);
