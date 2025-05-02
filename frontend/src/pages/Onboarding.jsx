@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { saveToStorage, getFromStorage, STORAGE_KEYS } from "../utils/localStorage";
 import { addBot } from "../utils/botsData";
 
@@ -41,7 +41,8 @@ export default function Onboarding() {
 
   const handleNext = () => {
     if (step === 1) {
-      // Generate domain from bot name
+      // Generate domain and URL from bot name
+      const botNameSlug = botName.toLowerCase().replace(/\s+/g, "-");
       const newDomain = `${botName.toLowerCase().replace(/\s+/g, "")}.ubos.bot`;
       setDomain(newDomain);
     }
@@ -51,11 +52,15 @@ export default function Onboarding() {
       setLoading(true);
       setTimeout(() => {
         // Create the new bot
+        const botNameSlug = botName.toLowerCase().replace(/\s+/g, "-");
+        const url = `/bot/${botNameSlug}`;
+        
         const newBot = {
           name: botName,
           description: botDescription,
           type: botType,
           domain: domain,
+          url: url,
           status: "active",
           avatar: avatar,
           owner: userEmail || 'user@example.com',
@@ -271,6 +276,21 @@ export default function Onboarding() {
                 <p>{botDescription || "I can answer questions, provide information, and help with various tasks related to " + (botType === 'support' ? 'customer support' : botType === 'sales' ? 'sales' : 'content creation')}</p>
               </div>
             </div>
+            
+            <div className="border rounded-lg p-3 mt-3 bg-blue-50">
+              <p className="text-sm font-medium text-blue-800 mb-1">Your bot is available at:</p>
+              <div className="flex items-center justify-between">
+                <p className="text-blue-600 font-mono">{domain}</p>
+                <Link 
+                  to={`/bot/${botName.toLowerCase().replace(/\s+/g, "-")}`}
+                  className="text-xs bg-blue-100 hover:bg-blue-200 text-blue-800 font-medium py-1 px-2 rounded transition-colors"
+                  target="_blank"
+                >
+                  Visit Bot
+                </Link>
+              </div>
+            </div>
+            
             <div className="text-sm text-gray-600 mt-2">
               🧠 Usage: <strong>0</strong> / 2,592,000 TPU-seconds this month
             </div>

@@ -11,7 +11,9 @@ const sampleBots = [
     createdAt: new Date('2025-04-15').toISOString(),
     status: 'active',
     type: 'support',
-    avatar: '🤖'
+    avatar: '🤖',
+    domain: 'support.ubos.bot',
+    url: '/bot/support'
   },
   {
     id: '2',
@@ -20,7 +22,9 @@ const sampleBots = [
     createdAt: new Date('2025-04-20').toISOString(),
     status: 'active',
     type: 'sales',
-    avatar: '🤑'
+    avatar: '🤑',
+    domain: 'sales.ubos.bot',
+    url: '/bot/sales'
   },
   {
     id: '3',
@@ -29,7 +33,9 @@ const sampleBots = [
     createdAt: new Date('2025-04-25').toISOString(),
     status: 'inactive',
     type: 'content',
-    avatar: '✍️'
+    avatar: '✍️',
+    domain: 'content.ubos.bot',
+    url: '/bot/content'
   }
 ];
 
@@ -58,10 +64,17 @@ export const addBot = (bot) => {
   const bots = getBots();
   console.log('Current bots before adding:', bots);
   
+  // Generate URL and domain from bot name if not provided
+  const botNameSlug = bot.name.toLowerCase().replace(/\s+/g, "-");
+  const domain = bot.domain || `${botNameSlug}.ubos.bot`;
+  const url = bot.url || `/bot/${botNameSlug}`;
+  
   const newBot = {
     ...bot,
     id: Date.now().toString(),
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    domain,
+    url
   };
   
   const updatedBots = [...bots, newBot];

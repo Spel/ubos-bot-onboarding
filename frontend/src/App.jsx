@@ -5,6 +5,7 @@ import Onboarding from './pages/Onboarding';
 import Chat from './pages/Chat';
 import Dashboard from './pages/Dashboard';
 import MyBots from './pages/MyBots';
+import BotLanding from './pages/BotLanding';
 import { getFromStorage, STORAGE_KEYS } from './utils/localStorage';
 
 // Home route component that redirects based on authentication status
@@ -38,6 +39,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/my-bots" element={<MyBots />} />
         <Route path="/chat/:botId" element={<Chat />} />
+        <Route path="/bot/:botId" element={<BotLanding />} />
       </Routes>
     </Router>
   );

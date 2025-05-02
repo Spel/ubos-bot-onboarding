@@ -139,8 +139,20 @@ export default function MyBots() {
                     </div>
                   </div>
                   <p className={`text-sm mb-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{bot.description}</p>
-                  <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                  <div className={`text-xs mb-2 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
                     Created: {new Date(bot.createdAt).toLocaleDateString()}
+                  </div>
+                  <div className="flex items-center">
+                    <Link 
+                      to={bot.url} 
+                      className={`text-xs font-medium ${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} flex items-center gap-1`}
+                    >
+                      <svg className="size-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                      </svg>
+                      {bot.domain}
+                    </Link>
                   </div>
                 </div>
                 <div className={`flex border-t ${darkMode ? 'border-neutral-700' : 'border-gray-200'}`}>
