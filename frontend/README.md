@@ -12,25 +12,27 @@ Build a minimum viable product of UBOS that enables users to create and deploy a
 
 ### Onboarding Flow
 
-- [ ] Email/OAuth signup with social providers.
-- [ ] Bot naming form with real-time domain availability check.
-- [ ] One-click provisioning that allocates subdomain, container, and TPU-sec credit.
-- [ ] Success screen with direct link to chat and dashboard.
+- [x] Email/OAuth signup with social providers (mock implementation).
+- [x] Bot naming form with domain generation.
+- [x] One-click provisioning that allocates subdomain (simulated).
+- [x] Success screen with direct link to chat and dashboard.
 - [x] Basic onboarding UI with multi-step flow (implemented in `Onboarding.jsx`)
 
 ### Default Agent Page
 
 - [x] Automatic landing page styled with Tailwind CSS, similar to a LinkedIn company page.
-- [ ] Pre-configured chat UI for end-user interactions.
+- [x] Bot-specific URLs and domains for each bot.
+- [x] Basic chat UI for end-user interactions (implemented in `BotLanding.jsx`).
 - [ ] Public API endpoint for A2A/MCP integrations.
 
 ### Chat Interface
 
-- [ ] Responsive web page with a lightweight chat widget.
+- [x] Responsive web page with a lightweight chat widget.
+- [x] Simulated messaging with bot responses based on type.
+- [x] Message history persisted in localStorage.
 - [ ] Real‑time messaging over WebSocket; fallback to REST polling.
-- [ ] Message history persisted per session.
 - [ ] Typing indicators and basic error handling.
-- [x] Basic chat UI structure (implemented in `Chat.jsx`)
+- [x] Basic chat UI structure (implemented in `Chat.jsx` and `BotLanding.jsx`)
 
 ### Admin Dashboard
 
@@ -53,7 +55,8 @@ Build a minimum viable product of UBOS that enables users to create and deploy a
 
 ### Domain Provisioning & DNS Setup
 
-- [ ] Automatic creation of yourbot.ubos.site subdomain on first deploy.
+- [x] Automatic generation of yourbot.ubos.bot subdomain on bot creation.
+- [x] Display of domain information in bot details.
 - [ ] Copy‑paste CNAME instructions for custom domains (e.g., chat.yourcompany.com).
 
 ### Notifications & Alerts
@@ -78,15 +81,19 @@ Build a minimum viable product of UBOS that enables users to create and deploy a
 - [x] Sidebar navigation with Dashboard and My Bots links
 - [x] Local storage for bot data management
 - [x] Responsive design with Tailwind CSS and Preline UI components
+- [x] Mock authentication system with login page
+- [x] Bot onboarding flow with domain generation
+- [x] Bot landing pages with unique URLs
+- [x] Basic chat interface with simulated responses
+- [x] GitHub repository integration
 
 ### In Progress
-- [ ] Authentication system
-- [ ] Real-time chat functionality
+- [ ] Enhanced chat functionality with more realistic AI responses
 - [ ] Usage tracking and visualization
 - [ ] Domain provisioning system
 
 ### Next Steps
-1. Implement authentication flow
-2. Build the chat interface with real-time messaging
-3. Create the domain provisioning system
-4. Develop usage tracking and billing features
+1. Enhance the chat interface with more realistic AI responses
+2. Implement usage tracking and visualization in the dashboard
+3. Add user profile and settings page
+4. Develop domain provisioning system with custom domain support
