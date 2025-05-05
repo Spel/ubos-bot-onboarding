@@ -90,13 +90,17 @@ export default function Onboarding() {
     // Ensure authentication is saved before redirecting
     saveToStorage(STORAGE_KEYS.IS_AUTHENTICATED, true);
     
-    // Use window.location.href for a full page reload and navigation
+    // Use React Router's navigate for proper routing with HashRouter
     if (isFromDashboard) {
       // If from dashboard, go back to My Bots page
-      window.location.href = "/my-bots";
+      navigate('/my-bots', { replace: true });
     } else {
       // Otherwise go to dashboard
-      window.location.href = "/dashboard";
+      // Using state to indicate we're coming from onboarding to prevent redirection issues
+      navigate('/dashboard', { 
+        replace: true,
+        state: { fromOnboarding: true }
+      });
     }
   };
 
@@ -314,4 +318,4 @@ export default function Onboarding() {
       </div>
     </div>
   );
-} 
+}

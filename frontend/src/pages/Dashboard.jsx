@@ -3,9 +3,10 @@ import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import { saveToStorage, getFromStorage, STORAGE_KEYS } from "../utils/localStorage";
 import { getBotCount, getActiveBotCount, getBotsByType, getBots } from "../utils/botsData";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 export default function Dashboard() {
+  const location = useLocation();
   const [darkMode, setDarkMode] = useState(getFromStorage(STORAGE_KEYS.DARK_MODE, false));
   const [tpuSeconds, setTpuSeconds] = useState(getFromStorage(STORAGE_KEYS.CREDITS, 2592000)); // Default to 2,592,000 TPU-seconds (720 hours)
   const [usedTpuSeconds, setUsedTpuSeconds] = useState(0);
@@ -50,6 +51,16 @@ export default function Dashboard() {
     }
     return hours.toString();
   };
+
+  // Check if we're coming from onboarding to ensure proper navigation
+  useEffect(() => {
+    // If we have the fromOnboarding state, ensure we're authenticated
+    if (location.state?.fromOnboarding) {
+      // Ensure authentication is properly set
+      saveToStorage(STORAGE_KEYS.IS_AUTHENTICATED, true);
+      console.log('Coming from onboarding, authentication confirmed');
+    }
+  }, [location]);
 
   // Load bot statistics and credits
   useEffect(() => {

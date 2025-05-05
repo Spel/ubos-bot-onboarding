@@ -27,8 +27,8 @@ export default function Login() {
       
       console.log('Authentication data saved, redirecting to onboarding');
       
-      // Use window.location.href for a full page reload and navigation
-      window.location.href = "/onboarding";
+      // Use React Router's navigate instead of window.location.href
+      navigate('/onboarding');
       setLoading(false);
     }, 1000);
   };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import MyBots from './pages/MyBots';
 import Onboarding from './pages/Onboarding';
@@ -24,7 +24,14 @@ function App() {
     const isAuthenticated = getFromStorage(STORAGE_KEYS.IS_AUTHENTICATED, false);
     
     // User is logged in if any of these conditions are true
-    setIsLoggedIn(!!(userEmail || email || isAuthenticated));
+    const loggedIn = !!(userEmail || email || isAuthenticated);
+    setIsLoggedIn(loggedIn);
+    
+    // Ensure authentication state is consistent
+    if (loggedIn && !isAuthenticated) {
+      saveToStorage(STORAGE_KEYS.IS_AUTHENTICATED, true);
+    }
+    
     setLoading(false);
   }, []);
   
