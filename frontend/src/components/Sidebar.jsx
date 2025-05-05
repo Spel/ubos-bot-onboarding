@@ -38,8 +38,9 @@ export default function Sidebar({ darkMode }) {
     // Clear all authentication data using the utility function
     clearAuthData();
     
-    // Use window.location.href for a full page reload and navigation
-    window.location.href = '/login';
+    // Navigate to login using React Router's navigate
+    // This ensures proper routing with HashRouter
+    navigate('/login');
   };
 
   return (
