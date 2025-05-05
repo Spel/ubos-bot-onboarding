@@ -56,9 +56,25 @@ export default function Dashboard() {
   useEffect(() => {
     // If we have the fromOnboarding state, ensure we're authenticated
     if (location.state?.fromOnboarding) {
-      // Ensure authentication is properly set
+      console.log('Coming from onboarding, ensuring authentication is set');
+      
+      // Ensure all authentication flags are properly set
       saveToStorage(STORAGE_KEYS.IS_AUTHENTICATED, true);
-      console.log('Coming from onboarding, authentication confirmed');
+      
+      // Make sure we have a user email
+      if (!getFromStorage(STORAGE_KEYS.USER_EMAIL, null)) {
+        saveToStorage(STORAGE_KEYS.USER_EMAIL, 'user@example.com');
+      }
+      
+      // Also set the EMAIL key for backward compatibility
+      if (!getFromStorage(STORAGE_KEYS.EMAIL, null)) {
+        saveToStorage(STORAGE_KEYS.EMAIL, getFromStorage(STORAGE_KEYS.USER_EMAIL, 'user@example.com'));
+      }
+      
+      // Trigger a storage event to notify other components
+      window.dispatchEvent(new Event('storage'));
+      
+      console.log('Authentication state confirmed in Dashboard');
     }
   }, [location]);
 

@@ -88,7 +88,24 @@ export default function Onboarding() {
   // Handle completion of the flow
   const handleComplete = () => {
     // Ensure authentication is saved before redirecting
+    // Save multiple authentication indicators to ensure consistency
     saveToStorage(STORAGE_KEYS.IS_AUTHENTICATED, true);
+    
+    // If we don't have a user email set, set a default one
+    if (!getFromStorage(STORAGE_KEYS.USER_EMAIL, null)) {
+      saveToStorage(STORAGE_KEYS.USER_EMAIL, 'user@example.com');
+    }
+    
+    // Also set the EMAIL key for backward compatibility
+    if (!getFromStorage(STORAGE_KEYS.EMAIL, null)) {
+      saveToStorage(STORAGE_KEYS.EMAIL, getFromStorage(STORAGE_KEYS.USER_EMAIL, 'user@example.com'));
+    }
+    
+    console.log('Onboarding complete - Auth state set to true');
+    
+    // Trigger a storage event to notify other components
+    // This is needed because localStorage events don't fire in the same window
+    window.dispatchEvent(new Event('storage'));
     
     // Use React Router's navigate for proper routing with HashRouter
     if (isFromDashboard) {

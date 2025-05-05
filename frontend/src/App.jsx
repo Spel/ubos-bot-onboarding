@@ -17,11 +17,16 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
   
-  useEffect(() => {
+  // Function to check authentication status
+  const checkAuthStatus = () => {
     // Check if user is logged in
     const userEmail = getFromStorage(STORAGE_KEYS.USER_EMAIL, null);
     const email = getFromStorage(STORAGE_KEYS.EMAIL, null);
     const isAuthenticated = getFromStorage(STORAGE_KEYS.IS_AUTHENTICATED, false);
+    
+    console.log('Auth check - userEmail:', userEmail);
+    console.log('Auth check - email:', email);
+    console.log('Auth check - isAuthenticated:', isAuthenticated);
     
     // User is logged in if any of these conditions are true
     const loggedIn = !!(userEmail || email || isAuthenticated);
@@ -33,6 +38,36 @@ function App() {
     }
     
     setLoading(false);
+    return loggedIn;
+  };
+  
+  // Check auth status on mount
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
+  
+  // Set up a listener to check auth status when localStorage changes
+  useEffect(() => {
+    // Function to handle storage events
+    const handleStorageChange = () => {
+      console.log('Storage changed, checking auth status');
+      checkAuthStatus();
+    };
+    
+    // Add event listener for storage changes
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also check periodically (every 1 second) for changes
+    // This helps with cases where the storage event might not fire
+    const interval = setInterval(() => {
+      checkAuthStatus();
+    }, 1000);
+    
+    // Clean up
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
   }, []);
   
   // Show loading while checking
