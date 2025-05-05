@@ -113,7 +113,7 @@ export default function MyBots() {
               <p className={`mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Manage your AI bots</p>
             </div>
             <button 
-              onClick={() => navigate('/onboarding', { state: { fromDashboard: true } })}
+              onClick={() => navigate('/create-agent')}
               className={`py-2.5 px-4 rounded-lg ${darkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} text-white transition-colors`}
             >
               <span className="flex items-center gap-x-2">
@@ -121,7 +121,7 @@ export default function MyBots() {
                   <line x1="12" y1="5" x2="12" y2="19"></line>
                   <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
-                Add New Bot
+                Create New Agent
               </span>
             </button>
           </div>

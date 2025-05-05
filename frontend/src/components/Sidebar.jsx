@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { getFromStorage, saveToStorage, STORAGE_KEYS } from "../utils/localStorage";
+import { getFromStorage, saveToStorage, clearAuthData, STORAGE_KEYS } from "../utils/localStorage";
 
 export default function Sidebar({ darkMode }) {
   const location = useLocation();
@@ -35,12 +35,11 @@ export default function Sidebar({ darkMode }) {
   
   // Handle logout
   const handleLogout = () => {
-    // Clear authentication state
-    saveToStorage(STORAGE_KEYS.IS_AUTHENTICATED, false);
-    saveToStorage(STORAGE_KEYS.USER_EMAIL, '');
+    // Clear all authentication data using the utility function
+    clearAuthData();
     
-    // Redirect to login page
-    navigate('/login');
+    // Use window.location.href for a full page reload and navigation
+    window.location.href = '/login';
   };
 
   return (
@@ -86,6 +85,23 @@ export default function Sidebar({ darkMode }) {
                   <rect width="7" height="5" x="3" y="16" rx="1"></rect>
                 </svg>
                 Dashboard
+              </Link>
+            </li>
+            
+            {/* Templates */}
+            <li>
+              <Link 
+                to="/templates" 
+                className={`flex items-center gap-x-3.5 py-2 px-2.5 text-sm rounded-md ${
+                  currentPath === '/templates' 
+                    ? (darkMode ? 'bg-neutral-700 text-white' : 'bg-gray-100 text-blue-600')
+                    : (darkMode ? 'text-gray-400 hover:bg-neutral-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600')
+                }`}
+              >
+                <svg className="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                Templates
               </Link>
             </li>
             

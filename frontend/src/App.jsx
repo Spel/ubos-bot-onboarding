@@ -9,6 +9,8 @@ import BotLanding from './pages/BotLanding';
 import SubscriptionPlans from './pages/SubscriptionPlans';
 import CostComparison from './pages/CostComparison';
 import Admin from './pages/Admin';
+import Templates from './pages/Templates';
+import CreateAgent from './pages/CreateAgent';
 import { getFromStorage, STORAGE_KEYS } from './utils/localStorage';
 
 function App() {
@@ -43,6 +45,8 @@ function App() {
         <Route path="/subscription-plans" element={isLoggedIn ? <SubscriptionPlans /> : <Navigate to="/login" />} />
         <Route path="/cost-comparison" element={isLoggedIn ? <CostComparison /> : <Navigate to="/login" />} />
         <Route path="/admin" element={isLoggedIn ? <Admin /> : <Navigate to="/login" />} />
+        <Route path="/templates" element={isLoggedIn ? <Templates /> : <Navigate to="/login" />} />
+        <Route path="/create-agent/:templateId?" element={isLoggedIn ? <CreateAgent /> : <Navigate to="/login" />} />
         <Route path="*" element={<Navigate to={isLoggedIn ? "/dashboard" : "/login"} />} />
       </Routes>
     </Router>

@@ -16,8 +16,12 @@ export default function Admin() {
     ltvCacRatio: 6.0,
     churnRate: 3.2,
     nrr: 108,
+    expansionRevenue: 4500,
+    contractionRevenue: 1200,
     totalUsers: 1250,
     activeUsers: 1050,
+    newUsersThisMonth: 85,
+    churnedUsersThisMonth: 32,
     usersByTier: {
       freemium: 500,
       partTime: 350,
@@ -40,8 +44,81 @@ export default function Admin() {
     },
     paybackPeriod: 5.2,
     projectedMrr: 75000,
-    breakEvenDate: "October 2025"
+    breakEvenDate: "October 2025",
+    grossMargin: 68,
+    netMargin: 22,
+    cashBurn: 65000,
+    runway: 14,
+    acquisitionChannels: {
+      organic: 35,
+      paid: 28,
+      referral: 22,
+      partnership: 15
+    },
+    conversionRates: {
+      visitToSignup: 3.2,
+      signupToActive: 65,
+      freeToPartTime: 12.5,
+      partTimeToStandard: 18,
+      standardToFullTime: 8
+    },
+    userLifecycle: {
+      averageDaysToConversion: 14,
+      averageDaysToChurn: 120,
+      averageSessionsPerWeek: 4.5
+    },
+    // TPU usage analysis data
+    tpuUsage: {
+      totalMonthly: 1850000,
+      averagePerUser: 1480,
+      byTier: {
+        freemium: 450,
+        partTime: 1200,
+        standard: 2100,
+        fullTime: 3500
+      },
+      costEfficiency: {
+        freemium: 0.09,  // $ per 1000 TPU
+        partTime: 0.025,
+        standard: 0.017,
+        fullTime: 0.011
+      },
+      utilizationRate: {
+        freemium: 45,  // % of allocated TPU used
+        partTime: 60,
+        standard: 70,
+        fullTime: 78
+      },
+      growthRate: 18.5, // % MoM growth in TPU usage
+      costTrend: -5.2   // % MoM reduction in TPU cost
+    },
+    // Time series data for charts
+    timeSeriesData: {
+      months: ['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May'],
+      mrr: [28000, 31000, 34500, 38000, 41500, 45000],
+      users: [780, 850, 920, 1050, 1180, 1250],
+      tpuUsage: [950000, 1100000, 1300000, 1450000, 1650000, 1850000],
+      churnRate: [4.8, 4.5, 4.1, 3.8, 3.5, 3.2],
+      cac: [420, 405, 390, 375, 360, 350],
+      ltv: [1600, 1700, 1800, 1900, 2000, 2100]
+    }
   });
+  
+  // Mock user data
+  const [users, setUsers] = useState([
+    { id: 1, name: "John Smith", email: "john@example.com", plan: "Full-Time", mrr: 120, status: "active", joinDate: "2024-12-15", lastActive: "2025-05-04", tpuUsage: 82 },
+    { id: 2, name: "Sarah Johnson", email: "sarah@example.com", plan: "Standard", mrr: 70, status: "active", joinDate: "2025-01-22", lastActive: "2025-05-05", tpuUsage: 65 },
+    { id: 3, name: "Michael Brown", email: "michael@example.com", plan: "Part-Time", mrr: 30, status: "active", joinDate: "2025-02-10", lastActive: "2025-05-01", tpuUsage: 28 },
+    { id: 4, name: "Emily Davis", email: "emily@example.com", plan: "Freemium", mrr: 0, status: "active", joinDate: "2025-03-05", lastActive: "2025-05-03", tpuUsage: 12 },
+    { id: 5, name: "David Wilson", email: "david@example.com", plan: "Standard", mrr: 70, status: "active", joinDate: "2025-01-18", lastActive: "2025-05-02", tpuUsage: 58 },
+    { id: 6, name: "Jessica Taylor", email: "jessica@example.com", plan: "Part-Time", mrr: 30, status: "at_risk", joinDate: "2025-02-28", lastActive: "2025-04-20", tpuUsage: 15 },
+    { id: 7, name: "Robert Martinez", email: "robert@example.com", plan: "Full-Time", mrr: 120, status: "active", joinDate: "2024-11-30", lastActive: "2025-05-04", tpuUsage: 90 },
+    { id: 8, name: "Lisa Anderson", email: "lisa@example.com", plan: "Freemium", mrr: 0, status: "churned", joinDate: "2025-03-15", lastActive: "2025-04-10", tpuUsage: 5 }
+  ]);
+  
+  // Filter states for user table
+  const [userFilter, setUserFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
   
   // Format currency
   const formatCurrency = (amount) => {
@@ -57,6 +134,32 @@ export default function Admin() {
   const formatPercentage = (value) => {
     return `${value}%`;
   };
+  
+  // Format date
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    }).format(date);
+  };
+  
+  // Filter users based on current filter and search term
+  const filteredUsers = users.filter(user => {
+    // Apply status filter
+    if (userFilter !== "all" && user.status !== userFilter) {
+      return false;
+    }
+    
+    // Apply search filter
+    if (searchTerm && !user.name.toLowerCase().includes(searchTerm.toLowerCase()) && 
+        !user.email.toLowerCase().includes(searchTerm.toLowerCase())) {
+      return false;
+    }
+    
+    return true;
+  });
   
   return (
     <div className={`min-h-screen ${darkMode ? 'bg-neutral-900' : 'bg-gray-50'}`}>
@@ -111,7 +214,7 @@ export default function Admin() {
                     <svg className="size-3 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clipRule="evenodd" />
                     </svg>
-                    <span>+15.2% from last quarter</span>
+                    <span>+15.2% YoY</span>
                   </div>
                 </div>
               </div>
@@ -119,7 +222,7 @@ export default function Admin() {
               {/* Churn Rate Card */}
               <div className={`${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'} border rounded-xl shadow-sm p-6`}>
                 <div className="flex flex-col">
-                  <span className={`text-xs font-semibold uppercase tracking-wide ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Churn Rate</span>
+                  <span className={`text-xs font-semibold uppercase tracking-wide ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Monthly Churn Rate</span>
                   <div className="mt-1">
                     <h3 className={`text-xl sm:text-2xl font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{formatPercentage(metrics.churnRate)}</h3>
                   </div>
@@ -127,7 +230,7 @@ export default function Admin() {
                     <svg className="size-3 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clipRule="evenodd" />
                     </svg>
-                    <span>-0.8% from last month</span>
+                    <span>-0.5% from last month</span>
                   </div>
                 </div>
               </div>
@@ -143,123 +246,347 @@ export default function Admin() {
                     <svg className="size-3 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clipRule="evenodd" />
                     </svg>
-                    <span>+0.5x from last quarter</span>
+                    <span>+0.8x from last quarter</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
           
-          {/* User Analytics */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <div>
-              <h2 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>User Analytics</h2>
-              <div className={`${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'} border rounded-xl shadow-sm p-6`}>
-                <div className="flex justify-between mb-4">
-                  <div>
-                    <h3 className={`text-lg font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>Total Users</h3>
-                    <p className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{metrics.totalUsers}</p>
-                  </div>
-                  <div>
-                    <h3 className={`text-lg font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>Active Users</h3>
-                    <p className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{metrics.activeUsers}</p>
-                  </div>
+          {/* Revenue Breakdown & User Growth */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            {/* Revenue Breakdown */}
+            <div className={`${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'} border rounded-xl shadow-sm p-6`}>
+              <h2 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Revenue Breakdown</h2>
+              
+              <div className="mb-4">
+                <div className="flex justify-between items-center mb-1">
+                  <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>New MRR</span>
+                  <span className={`text-sm font-medium ${darkMode ? 'text-green-400' : 'text-green-600'}`}>{formatCurrency(metrics.newUsersThisMonth * metrics.arpu)}</span>
                 </div>
-                
-                <h4 className={`text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Users by Subscription Tier</h4>
-                
-                {/* Freemium */}
-                <div className="mb-3">
+                <div className="flex justify-between items-center mb-1">
+                  <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Expansion MRR</span>
+                  <span className={`text-sm font-medium ${darkMode ? 'text-green-400' : 'text-green-600'}`}>{formatCurrency(metrics.expansionRevenue)}</span>
+                </div>
+                <div className="flex justify-between items-center mb-1">
+                  <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Contraction MRR</span>
+                  <span className={`text-sm font-medium ${darkMode ? 'text-red-400' : 'text-red-600'}`}>-{formatCurrency(metrics.contractionRevenue)}</span>
+                </div>
+                <div className="flex justify-between items-center mb-1">
+                  <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Churned MRR</span>
+                  <span className={`text-sm font-medium ${darkMode ? 'text-red-400' : 'text-red-600'}`}>-{formatCurrency(metrics.churnedUsersThisMonth * metrics.arpu)}</span>
+                </div>
+                <div className="flex justify-between items-center pt-2 mt-2 border-t border-gray-200 dark:border-gray-700">
+                  <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Net MRR Growth</span>
+                  <span className={`text-sm font-medium ${darkMode ? 'text-green-400' : 'text-green-600'}`}>{formatCurrency(metrics.newUsersThisMonth * metrics.arpu + metrics.expansionRevenue - metrics.contractionRevenue - metrics.churnedUsersThisMonth * metrics.arpu)}</span>
+                </div>
+              </div>
+              
+              <h3 className={`text-md font-medium mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Revenue by Plan</h3>
+              <div className="space-y-4">
+                <div>
                   <div className="flex justify-between items-center mb-1">
                     <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Freemium</span>
-                    <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{metrics.usersByTier.freemium}</span>
+                    <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{formatCurrency(metrics.revenueByTier.freemium)} (0%)</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-                    <div className="bg-gray-500 h-2 rounded-full" style={{ width: `${(metrics.usersByTier.freemium / metrics.totalUsers) * 100}%` }}></div>
+                    <div className="bg-blue-600 h-2 rounded-full" style={{ width: '0%' }}></div>
                   </div>
                 </div>
                 
-                {/* Part-Time */}
-                <div className="mb-3">
+                <div>
                   <div className="flex justify-between items-center mb-1">
                     <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Part-Time</span>
-                    <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{metrics.usersByTier.partTime}</span>
+                    <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{formatCurrency(metrics.revenueByTier.partTime)} (23.7%)</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-                    <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${(metrics.usersByTier.partTime / metrics.totalUsers) * 100}%` }}></div>
+                    <div className="bg-blue-600 h-2 rounded-full" style={{ width: '23.7%' }}></div>
                   </div>
                 </div>
                 
-                {/* Standard */}
-                <div className="mb-3">
+                <div>
                   <div className="flex justify-between items-center mb-1">
                     <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Standard</span>
-                    <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{metrics.usersByTier.standard}</span>
+                    <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{formatCurrency(metrics.revenueByTier.standard)} (44.1%)</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-                    <div className="bg-green-500 h-2 rounded-full" style={{ width: `${(metrics.usersByTier.standard / metrics.totalUsers) * 100}%` }}></div>
+                    <div className="bg-blue-600 h-2 rounded-full" style={{ width: '44.1%' }}></div>
                   </div>
                 </div>
                 
-                {/* Full-Time */}
                 <div>
                   <div className="flex justify-between items-center mb-1">
                     <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Full-Time</span>
-                    <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{metrics.usersByTier.fullTime}</span>
+                    <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{formatCurrency(metrics.revenueByTier.fullTime)} (32.2%)</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-                    <div className="bg-purple-500 h-2 rounded-full" style={{ width: `${(metrics.usersByTier.fullTime / metrics.totalUsers) * 100}%` }}></div>
+                    <div className="bg-blue-600 h-2 rounded-full" style={{ width: '32.2%' }}></div>
                   </div>
                 </div>
               </div>
             </div>
             
-            <div>
-              <h2 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Revenue Breakdown</h2>
-              <div className={`${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'} border rounded-xl shadow-sm p-6`}>
-                <div className="flex justify-between mb-4">
-                  <div>
-                    <h3 className={`text-lg font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>Total Monthly Revenue</h3>
-                    <p className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{formatCurrency(metrics.mrr)}</p>
+            {/* User Growth */}
+            <div className={`${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'} border rounded-xl shadow-sm p-6`}>
+              <h2 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>User Growth</h2>
+              
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className={`p-4 rounded-lg ${darkMode ? 'bg-neutral-700' : 'bg-gray-100'}`}>
+                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>Total Users</div>
+                  <div className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{metrics.totalUsers}</div>
+                  <div className={`text-xs ${darkMode ? 'text-green-400' : 'text-green-600'} mt-1`}>+7.2% from last month</div>
+                </div>
+                
+                <div className={`p-4 rounded-lg ${darkMode ? 'bg-neutral-700' : 'bg-gray-100'}`}>
+                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>Active Users</div>
+                  <div className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{metrics.activeUsers}</div>
+                  <div className={`text-xs ${darkMode ? 'text-green-400' : 'text-green-600'} mt-1`}>+5.8% from last month</div>
+                </div>
+                
+                <div className={`p-4 rounded-lg ${darkMode ? 'bg-neutral-700' : 'bg-gray-100'}`}>
+                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>New Users</div>
+                  <div className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{metrics.newUsersThisMonth}</div>
+                  <div className={`text-xs ${darkMode ? 'text-green-400' : 'text-green-600'} mt-1`}>+12.3% from last month</div>
+                </div>
+                
+                <div className={`p-4 rounded-lg ${darkMode ? 'bg-neutral-700' : 'bg-gray-100'}`}>
+                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>Churned Users</div>
+                  <div className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{metrics.churnedUsersThisMonth}</div>
+                  <div className={`text-xs ${darkMode ? 'text-green-400' : 'text-green-600'} mt-1`}>-15% from last month</div>
+                </div>
+              </div>
+              
+              <h3 className={`text-md font-medium mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Users by Plan</h3>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Freemium</span>
+                    <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{metrics.usersByTier.freemium} ({Math.round(metrics.usersByTier.freemium / metrics.totalUsers * 100)}%)</span>
                   </div>
-                  <div>
-                    <h3 className={`text-lg font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>ARPU</h3>
-                    <p className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{formatCurrency(metrics.arpu)}</p>
+                  <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                    <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${Math.round(metrics.usersByTier.freemium / metrics.totalUsers * 100)}%` }}></div>
                   </div>
                 </div>
                 
-                <h4 className={`text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Revenue by Subscription Tier</h4>
-                
-                {/* Part-Time */}
-                <div className="mb-3">
+                <div>
                   <div className="flex justify-between items-center mb-1">
                     <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Part-Time</span>
-                    <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{formatCurrency(metrics.revenueByTier.partTime)}</span>
+                    <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{metrics.usersByTier.partTime} ({Math.round(metrics.usersByTier.partTime / metrics.totalUsers * 100)}%)</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-                    <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${(metrics.revenueByTier.partTime / metrics.mrr) * 100}%` }}></div>
+                    <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${Math.round(metrics.usersByTier.partTime / metrics.totalUsers * 100)}%` }}></div>
                   </div>
                 </div>
                 
-                {/* Standard */}
-                <div className="mb-3">
+                <div>
                   <div className="flex justify-between items-center mb-1">
                     <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Standard</span>
-                    <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{formatCurrency(metrics.revenueByTier.standard)}</span>
+                    <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{metrics.usersByTier.standard} ({Math.round(metrics.usersByTier.standard / metrics.totalUsers * 100)}%)</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-                    <div className="bg-green-500 h-2 rounded-full" style={{ width: `${(metrics.revenueByTier.standard / metrics.mrr) * 100}%` }}></div>
+                    <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${Math.round(metrics.usersByTier.standard / metrics.totalUsers * 100)}%` }}></div>
                   </div>
                 </div>
                 
-                {/* Full-Time */}
                 <div>
                   <div className="flex justify-between items-center mb-1">
                     <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Full-Time</span>
-                    <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{formatCurrency(metrics.revenueByTier.fullTime)}</span>
+                    <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{metrics.usersByTier.fullTime} ({Math.round(metrics.usersByTier.fullTime / metrics.totalUsers * 100)}%)</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-                    <div className="bg-purple-500 h-2 rounded-full" style={{ width: `${(metrics.revenueByTier.fullTime / metrics.mrr) * 100}%` }}></div>
+                    <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${Math.round(metrics.usersByTier.fullTime / metrics.totalUsers * 100)}%` }}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* TPU Usage Analysis */}
+          <div className="mb-6">
+            <h2 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>TPU Usage Analysis</h2>
+            <div className={`${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'} border rounded-xl shadow-sm p-6`}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* TPU Usage Overview */}
+                <div>
+                  <h3 className={`text-md font-medium mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>TPU Usage Overview</h3>
+                  
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className={`p-4 rounded-lg ${darkMode ? 'bg-neutral-700' : 'bg-gray-100'}`}>
+                      <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>Total Monthly TPU</div>
+                      <div className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{new Intl.NumberFormat().format(metrics.tpuUsage.totalMonthly)}</div>
+                      <div className={`text-xs ${darkMode ? 'text-green-400' : 'text-green-600'} mt-1`}>+{metrics.tpuUsage.growthRate}% MoM</div>
+                    </div>
+                    
+                    <div className={`p-4 rounded-lg ${darkMode ? 'bg-neutral-700' : 'bg-gray-100'}`}>
+                      <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>Avg. TPU per User</div>
+                      <div className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{new Intl.NumberFormat().format(metrics.tpuUsage.averagePerUser)}</div>
+                      <div className={`text-xs ${darkMode ? 'text-green-400' : 'text-green-600'} mt-1`}>+8.2% MoM</div>
+                    </div>
+                  </div>
+                  
+                  <h4 className={`text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>TPU Usage by Plan</h4>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Freemium</span>
+                        <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{new Intl.NumberFormat().format(metrics.tpuUsage.byTier.freemium)} TPU</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                        <div 
+                          className="bg-gray-500 h-2 rounded-full" 
+                          style={{ width: `${(metrics.tpuUsage.byTier.freemium / metrics.tpuUsage.byTier.fullTime) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Part-Time</span>
+                        <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{new Intl.NumberFormat().format(metrics.tpuUsage.byTier.partTime)} TPU</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                        <div 
+                          className="bg-blue-500 h-2 rounded-full" 
+                          style={{ width: `${(metrics.tpuUsage.byTier.partTime / metrics.tpuUsage.byTier.fullTime) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Standard</span>
+                        <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{new Intl.NumberFormat().format(metrics.tpuUsage.byTier.standard)} TPU</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                        <div 
+                          className="bg-green-500 h-2 rounded-full" 
+                          style={{ width: `${(metrics.tpuUsage.byTier.standard / metrics.tpuUsage.byTier.fullTime) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Full-Time</span>
+                        <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{new Intl.NumberFormat().format(metrics.tpuUsage.byTier.fullTime)} TPU</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                        <div 
+                          className="bg-purple-500 h-2 rounded-full" 
+                          style={{ width: '100%' }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Cost Efficiency Metrics */}
+                <div>
+                  <h3 className={`text-md font-medium mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Cost Efficiency Metrics</h3>
+                  
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className={`p-4 rounded-lg ${darkMode ? 'bg-neutral-700' : 'bg-gray-100'}`}>
+                      <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>Cost per TPU</div>
+                      <div className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>${metrics.costPerTpu.toFixed(4)}</div>
+                      <div className={`text-xs ${darkMode ? 'text-green-400' : 'text-green-600'} mt-1`}>{metrics.tpuUsage.costTrend}% MoM</div>
+                    </div>
+                    
+                    <div className={`p-4 rounded-lg ${darkMode ? 'bg-neutral-700' : 'bg-gray-100'}`}>
+                      <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>Avg. Utilization</div>
+                      <div className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+                        {Math.round((metrics.tpuUsage.utilizationRate.freemium * metrics.usersByTier.freemium +
+                          metrics.tpuUsage.utilizationRate.partTime * metrics.usersByTier.partTime +
+                          metrics.tpuUsage.utilizationRate.standard * metrics.usersByTier.standard +
+                          metrics.tpuUsage.utilizationRate.fullTime * metrics.usersByTier.fullTime) / metrics.totalUsers)}%
+                      </div>
+                      <div className={`text-xs ${darkMode ? 'text-green-400' : 'text-green-600'} mt-1`}>+3.5% MoM</div>
+                    </div>
+                  </div>
+                  
+                  <h4 className={`text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Cost per 1000 TPU by Plan</h4>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Freemium</span>
+                        <span className={`text-sm font-medium ${darkMode ? 'text-red-400' : 'text-red-600'}`}>${metrics.tpuUsage.costEfficiency.freemium.toFixed(3)}</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                        <div 
+                          className="bg-red-500 h-2 rounded-full" 
+                          style={{ width: `${(metrics.tpuUsage.costEfficiency.freemium / 0.1) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Part-Time</span>
+                        <span className={`text-sm font-medium ${darkMode ? 'text-green-400' : 'text-green-600'}`}>${metrics.tpuUsage.costEfficiency.partTime.toFixed(3)}</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                        <div 
+                          className="bg-green-500 h-2 rounded-full" 
+                          style={{ width: `${(metrics.tpuUsage.costEfficiency.partTime / 0.1) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Standard</span>
+                        <span className={`text-sm font-medium ${darkMode ? 'text-green-400' : 'text-green-600'}`}>${metrics.tpuUsage.costEfficiency.standard.toFixed(3)}</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                        <div 
+                          className="bg-green-500 h-2 rounded-full" 
+                          style={{ width: `${(metrics.tpuUsage.costEfficiency.standard / 0.1) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Full-Time</span>
+                        <span className={`text-sm font-medium ${darkMode ? 'text-green-400' : 'text-green-600'}`}>${metrics.tpuUsage.costEfficiency.fullTime.toFixed(3)}</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                        <div 
+                          className="bg-green-500 h-2 rounded-full" 
+                          style={{ width: `${(metrics.tpuUsage.costEfficiency.fullTime / 0.1) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <h4 className={`text-sm font-medium mt-4 mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Utilization Rate by Plan</h4>
+                  
+                  <div className="grid grid-cols-4 gap-2">
+                    <div className="text-center">
+                      <div className={`inline-flex items-center justify-center size-12 rounded-full ${darkMode ? 'bg-neutral-700' : 'bg-gray-100'}`}>
+                        <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{metrics.tpuUsage.utilizationRate.freemium}%</span>
+                      </div>
+                      <div className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Free</div>
+                    </div>
+                    <div className="text-center">
+                      <div className={`inline-flex items-center justify-center size-12 rounded-full ${darkMode ? 'bg-neutral-700' : 'bg-gray-100'}`}>
+                        <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{metrics.tpuUsage.utilizationRate.partTime}%</span>
+                      </div>
+                      <div className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Part</div>
+                    </div>
+                    <div className="text-center">
+                      <div className={`inline-flex items-center justify-center size-12 rounded-full ${darkMode ? 'bg-neutral-700' : 'bg-gray-100'}`}>
+                        <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{metrics.tpuUsage.utilizationRate.standard}%</span>
+                      </div>
+                      <div className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Std</div>
+                    </div>
+                    <div className="text-center">
+                      <div className={`inline-flex items-center justify-center size-12 rounded-full ${darkMode ? 'bg-neutral-700' : 'bg-gray-100'}`}>
+                        <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{metrics.tpuUsage.utilizationRate.fullTime}%</span>
+                      </div>
+                      <div className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Full</div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -284,6 +611,12 @@ export default function Admin() {
                       <div className="flex justify-between items-center mb-1">
                         <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>LTV</span>
                         <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{formatCurrency(metrics.ltv)}</span>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>LTV:CAC Ratio</span>
+                        <span className={`text-sm font-medium ${darkMode ? 'text-green-400' : 'text-green-600'}`}>{metrics.ltvCacRatio}x</span>
                       </div>
                     </div>
                     <div>
@@ -342,13 +675,240 @@ export default function Admin() {
                     </div>
                     <div>
                       <div className="flex justify-between items-center mb-1">
-                        <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Cost per TPU</span>
-                        <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>${metrics.costPerTpu.toFixed(4)}</span>
+                        <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Gross Margin</span>
+                        <span className={`text-sm font-medium ${darkMode ? 'text-green-400' : 'text-green-600'}`}>{formatPercentage(metrics.grossMargin)}</span>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Net Margin</span>
+                        <span className={`text-sm font-medium ${darkMode ? 'text-green-400' : 'text-green-600'}`}>{formatPercentage(metrics.netMargin)}</span>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+          
+          {/* Time Series Analysis */}
+          <div className="mb-6">
+            <h2 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Key Metrics Over Time</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* MRR Growth */}
+              <div className={`${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'} border rounded-xl shadow-sm p-6`}>
+                <h3 className={`text-md font-medium mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>MRR Growth</h3>
+                <div className="flex items-end h-40 gap-4">
+                  {metrics.timeSeriesData.mrr.map((value, index) => (
+                    <div key={index} className="flex flex-col items-center flex-1">
+                      <div 
+                        className={`w-full ${darkMode ? 'bg-blue-600' : 'bg-blue-500'} rounded-t-sm`}
+                        style={{ 
+                          height: `${(value / Math.max(...metrics.timeSeriesData.mrr)) * 100}%`,
+                          minHeight: '4px'
+                        }}
+                      ></div>
+                      <span className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{metrics.timeSeriesData.months[index]}</span>
+                      <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>${(value / 1000).toFixed(0)}k</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* User Growth */}
+              <div className={`${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'} border rounded-xl shadow-sm p-6`}>
+                <h3 className={`text-md font-medium mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>User Growth</h3>
+                <div className="flex items-end h-40 gap-4">
+                  {metrics.timeSeriesData.users.map((value, index) => (
+                    <div key={index} className="flex flex-col items-center flex-1">
+                      <div 
+                        className={`w-full ${darkMode ? 'bg-green-600' : 'bg-green-500'} rounded-t-sm`}
+                        style={{ 
+                          height: `${(value / Math.max(...metrics.timeSeriesData.users)) * 100}%`,
+                          minHeight: '4px'
+                        }}
+                      ></div>
+                      <span className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{metrics.timeSeriesData.months[index]}</span>
+                      <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>{value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* TPU Usage Growth */}
+              <div className={`${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'} border rounded-xl shadow-sm p-6`}>
+                <h3 className={`text-md font-medium mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>TPU Usage (thousands)</h3>
+                <div className="flex items-end h-40 gap-4">
+                  {metrics.timeSeriesData.tpuUsage.map((value, index) => (
+                    <div key={index} className="flex flex-col items-center flex-1">
+                      <div 
+                        className={`w-full ${darkMode ? 'bg-purple-600' : 'bg-purple-500'} rounded-t-sm`}
+                        style={{ 
+                          height: `${(value / Math.max(...metrics.timeSeriesData.tpuUsage)) * 100}%`,
+                          minHeight: '4px'
+                        }}
+                      ></div>
+                      <span className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{metrics.timeSeriesData.months[index]}</span>
+                      <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>{(value / 1000).toFixed(0)}k</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Churn Rate Trend */}
+              <div className={`${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'} border rounded-xl shadow-sm p-6`}>
+                <h3 className={`text-md font-medium mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Churn Rate (%)</h3>
+                <div className="flex items-end h-40 gap-4">
+                  {metrics.timeSeriesData.churnRate.map((value, index) => (
+                    <div key={index} className="flex flex-col items-center flex-1">
+                      <div 
+                        className={`w-full ${darkMode ? 'bg-red-600' : 'bg-red-500'} rounded-t-sm`}
+                        style={{ 
+                          height: `${(value / Math.max(...metrics.timeSeriesData.churnRate)) * 100}%`,
+                          minHeight: '4px'
+                        }}
+                      ></div>
+                      <span className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{metrics.timeSeriesData.months[index]}</span>
+                      <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>{value.toFixed(1)}%</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* User Management */}
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-3">
+              <h2 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>User Management</h2>
+              <div className="flex items-center space-x-2">
+                <div className={`relative ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                    <svg className="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                    </svg>
+                  </span>
+                  <input
+                    type="text"
+                    className={`py-2 pl-10 pr-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${darkMode ? 'bg-neutral-700 text-white' : 'bg-white text-gray-900'}`}
+                    placeholder="Search users..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+                <select
+                  className={`py-2 px-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${darkMode ? 'bg-neutral-700 text-white' : 'bg-white text-gray-900'}`}
+                  value={userFilter}
+                  onChange={(e) => setUserFilter(e.target.value)}
+                >
+                  <option value="all">All Users</option>
+                  <option value="active">Active</option>
+                  <option value="at_risk">At Risk</option>
+                  <option value="churned">Churned</option>
+                </select>
+              </div>
+            </div>
+            
+            <div className={`${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'} border rounded-xl shadow-sm overflow-hidden`}>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className={darkMode ? 'bg-neutral-700' : 'bg-gray-50'}>
+                    <tr>
+                      <th scope="col" className={`px-6 py-3 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-500'} uppercase tracking-wider`}>User</th>
+                      <th scope="col" className={`px-6 py-3 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-500'} uppercase tracking-wider`}>Plan</th>
+                      <th scope="col" className={`px-6 py-3 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-500'} uppercase tracking-wider`}>MRR</th>
+                      <th scope="col" className={`px-6 py-3 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-500'} uppercase tracking-wider`}>Status</th>
+                      <th scope="col" className={`px-6 py-3 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-500'} uppercase tracking-wider`}>Join Date</th>
+                      <th scope="col" className={`px-6 py-3 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-500'} uppercase tracking-wider`}>Last Active</th>
+                      <th scope="col" className={`px-6 py-3 text-left text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-500'} uppercase tracking-wider`}>TPU Usage</th>
+                      <th scope="col" className={`px-6 py-3 text-right text-xs font-medium ${darkMode ? 'text-gray-300' : 'text-gray-500'} uppercase tracking-wider`}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className={`divide-y divide-gray-200 dark:divide-gray-700 ${darkMode ? 'bg-neutral-800' : 'bg-white'}`}>
+                    {filteredUsers.map(user => (
+                      <tr key={user.id} className={darkMode ? 'hover:bg-neutral-700' : 'hover:bg-gray-50'}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className={`flex-shrink-0 size-10 rounded-full flex items-center justify-center ${darkMode ? 'bg-blue-600' : 'bg-blue-100'}`}>
+                              <span className={`text-sm font-medium ${darkMode ? 'text-white' : 'text-blue-600'}`}>
+                                {user.name.charAt(0).toUpperCase()}
+                              </span>
+                            </div>
+                            <div className="ml-4">
+                              <div className={`text-sm font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>{user.name}</div>
+                              <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{user.email}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            user.plan === 'Full-Time' 
+                              ? (darkMode ? 'bg-purple-900 text-purple-200' : 'bg-purple-100 text-purple-800') 
+                              : user.plan === 'Standard'
+                                ? (darkMode ? 'bg-green-900 text-green-200' : 'bg-green-100 text-green-800')
+                                : user.plan === 'Part-Time'
+                                  ? (darkMode ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-800')
+                                  : (darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-800')
+                          }`}>
+                            {user.plan}
+                          </span>
+                        </td>
+                        <td className={`px-6 py-4 whitespace-nowrap text-sm ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                          {formatCurrency(user.mrr)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            user.status === 'active' 
+                              ? (darkMode ? 'bg-green-900 text-green-200' : 'bg-green-100 text-green-800') 
+                              : user.status === 'at_risk'
+                                ? (darkMode ? 'bg-yellow-900 text-yellow-200' : 'bg-yellow-100 text-yellow-800')
+                                : (darkMode ? 'bg-red-900 text-red-200' : 'bg-red-100 text-red-800')
+                          }`}>
+                            {user.status === 'active' ? 'Active' : user.status === 'at_risk' ? 'At Risk' : 'Churned'}
+                          </span>
+                        </td>
+                        <td className={`px-6 py-4 whitespace-nowrap text-sm ${darkMode ? 'text-gray-300' : 'text-gray-500'}`}>
+                          {formatDate(user.joinDate)}
+                        </td>
+                        <td className={`px-6 py-4 whitespace-nowrap text-sm ${darkMode ? 'text-gray-300' : 'text-gray-500'}`}>
+                          {formatDate(user.lastActive)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700 mr-2" style={{ width: '100px' }}>
+                              <div 
+                                className={`h-2 rounded-full ${
+                                  user.tpuUsage > 75 
+                                    ? 'bg-green-500' 
+                                    : user.tpuUsage > 25 
+                                      ? 'bg-blue-500' 
+                                      : 'bg-gray-500'
+                                }`} 
+                                style={{ width: `${user.tpuUsage}%` }}
+                              ></div>
+                            </div>
+                            <span className={`text-xs ${darkMode ? 'text-gray-300' : 'text-gray-500'}`}>{user.tpuUsage}%</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <button className={`text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-3`}>
+                            View
+                          </button>
+                          <button className={`text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300`}>
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              
+              {filteredUsers.length === 0 && (
+                <div className={`py-8 text-center ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                  No users found matching your criteria
+                </div>
+              )}
             </div>
           </div>
         </main>

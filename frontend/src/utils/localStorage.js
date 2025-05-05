@@ -84,3 +84,21 @@ export const clearAllStorage = () => {
     return false;
   }
 };
+
+/**
+ * Clear authentication data from localStorage
+ * Useful for logout functionality
+ */
+export const clearAuthData = () => {
+  try {
+    console.log('Clearing authentication data from localStorage');
+    saveToStorage(STORAGE_KEYS.IS_AUTHENTICATED, false);
+    saveToStorage(STORAGE_KEYS.USER_EMAIL, '');
+    saveToStorage(STORAGE_KEYS.EMAIL, '');
+    console.log('Authentication data cleared');
+    return true;
+  } catch (error) {
+    console.error('Error clearing authentication data:', error);
+    return false;
+  }
+};
