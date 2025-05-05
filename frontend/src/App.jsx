@@ -1,22 +1,28 @@
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import Login from './pages/Login';
-import Onboarding from './pages/Onboarding';
-import Chat from './pages/Chat';
 import Dashboard from './pages/Dashboard';
 import MyBots from './pages/MyBots';
+import Onboarding from './pages/Onboarding';
+import Login from './pages/Login';
+import Chat from './pages/Chat';
 import BotLanding from './pages/BotLanding';
+import SubscriptionPlans from './pages/SubscriptionPlans';
+import CostComparison from './pages/CostComparison';
+import Admin from './pages/Admin';
 import { getFromStorage, STORAGE_KEYS } from './utils/localStorage';
 
-// Home route component that redirects based on authentication status
-function HomeRoute() {
+function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   
   useEffect(() => {
-    // Check if user is authenticated
-    const authStatus = getFromStorage(STORAGE_KEYS.IS_AUTHENTICATED, false);
-    setIsAuthenticated(authStatus);
+    // Check if user is logged in
+    const userEmail = getFromStorage(STORAGE_KEYS.USER_EMAIL, null);
+    const email = getFromStorage(STORAGE_KEYS.EMAIL, null);
+    const isAuthenticated = getFromStorage(STORAGE_KEYS.IS_AUTHENTICATED, false);
+    
+    // User is logged in if any of these conditions are true
+    setIsLoggedIn(!!(userEmail || email || isAuthenticated));
     setLoading(false);
   }, []);
   
@@ -25,24 +31,22 @@ function HomeRoute() {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
   
-  // Redirect to login if not authenticated
-  return isAuthenticated ? <Navigate to="/onboarding" replace /> : <Navigate to="/login" replace />;
-}
-
-function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<HomeRoute />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={isLoggedIn ? <Navigate to="/dashboard" /> : <Login />} />
         <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/my-bots" element={<MyBots />} />
-        <Route path="/chat/:botId" element={<Chat />} />
-        <Route path="/bot/:botId" element={<BotLanding />} />
+        <Route path="/dashboard" element={isLoggedIn ? <Dashboard /> : <Navigate to="/login" />} />
+        <Route path="/my-bots" element={isLoggedIn ? <MyBots /> : <Navigate to="/login" />} />
+        <Route path="/chat/:botId" element={isLoggedIn ? <Chat /> : <Navigate to="/login" />} />
+        <Route path="/bot/:botId" element={isLoggedIn ? <BotLanding /> : <Navigate to="/login" />} />
+        <Route path="/subscription-plans" element={isLoggedIn ? <SubscriptionPlans /> : <Navigate to="/login" />} />
+        <Route path="/cost-comparison" element={isLoggedIn ? <CostComparison /> : <Navigate to="/login" />} />
+        <Route path="/admin" element={isLoggedIn ? <Admin /> : <Navigate to="/login" />} />
+        <Route path="*" element={<Navigate to={isLoggedIn ? "/dashboard" : "/login"} />} />
       </Routes>
     </Router>
   );
 }
 
-export default App
+export default App;

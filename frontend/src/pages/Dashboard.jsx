@@ -2,12 +2,16 @@ import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import { saveToStorage, getFromStorage, STORAGE_KEYS } from "../utils/localStorage";
-import { getBotCount, getActiveBotCount, getBotsByType } from "../utils/botsData";
+import { getBotCount, getActiveBotCount, getBotsByType, getBots } from "../utils/botsData";
 import { Link } from "react-router-dom";
 
 export default function Dashboard() {
   const [darkMode, setDarkMode] = useState(getFromStorage(STORAGE_KEYS.DARK_MODE, false));
-  const [credits, setCredits] = useState(getFromStorage(STORAGE_KEYS.CREDITS, 2592000)); // Default to 2,592,000 TPU-seconds
+  const [tpuSeconds, setTpuSeconds] = useState(getFromStorage(STORAGE_KEYS.CREDITS, 2592000)); // Default to 2,592,000 TPU-seconds (720 hours)
+  const [usedTpuSeconds, setUsedTpuSeconds] = useState(0);
+  const [remainingTpuSeconds, setRemainingTpuSeconds] = useState(0);
+  const [tpuHours, setTpuHours] = useState(0);
+  const [usedTpuHours, setUsedTpuHours] = useState(0);
   
   // Toggle dark mode function
   const toggleDarkMode = () => {
@@ -24,21 +28,10 @@ export default function Dashboard() {
     }
   };
   
-  // Initialize theme from localStorage or default to light mode
-  useEffect(() => {
-    const savedDarkMode = getFromStorage(STORAGE_KEYS.DARK_MODE, false);
-    setDarkMode(savedDarkMode);
-    
-    if (savedDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, []);
-
   const [botCount, setBotCount] = useState(0);
   const [activeBotCount, setActiveBotCount] = useState(0);
   const [botTypes, setBotTypes] = useState({});
+  const [topBots, setTopBots] = useState([]);
 
   // Format credits in a readable way
   const formatCredits = (tpuSeconds) => {
@@ -48,6 +41,14 @@ export default function Dashboard() {
       return `${(tpuSeconds / 1000).toFixed(1)}K`;
     }
     return tpuSeconds.toString();
+  };
+  
+  // Format hours in a readable way
+  const formatHours = (hours) => {
+    if (hours >= 1000) {
+      return `${(hours / 1000).toFixed(1)}K`;
+    }
+    return hours.toString();
   };
 
   // Load bot statistics and credits
@@ -62,13 +63,29 @@ export default function Dashboard() {
     types.sales = getBotsByType('sales').length;
     types.content = getBotsByType('content').length;
     
-    // Get credits
-    const userCredits = getFromStorage(STORAGE_KEYS.CREDITS, 2592000);
+    // Get credits and calculate usage (67% used)
+    const userTpuSeconds = getFromStorage(STORAGE_KEYS.CREDITS, 2592000);
+    const usedTpuSecs = Math.round(userTpuSeconds * 0.67);
+    const remainingTpuSecs = userTpuSeconds - usedTpuSecs;
+    
+    // Convert to hours
+    const totalHours = Math.round(userTpuSeconds / 3600);
+    const usedHours = Math.round(usedTpuSecs / 3600);
+    
+    // Get top 3 most active bots
+    const allBots = getBots();
+    const sortedBots = [...allBots].sort((a, b) => (b.executionCount || 0) - (a.executionCount || 0));
+    const top3Bots = sortedBots.slice(0, 3);
     
     setBotCount(totalBots);
     setActiveBotCount(activeBots);
     setBotTypes(types);
-    setCredits(userCredits);
+    setTpuSeconds(userTpuSeconds);
+    setUsedTpuSeconds(usedTpuSecs);
+    setRemainingTpuSeconds(remainingTpuSecs);
+    setTpuHours(totalHours);
+    setUsedTpuHours(usedHours);
+    setTopBots(top3Bots);
   }, []);
 
   return (
@@ -143,22 +160,79 @@ export default function Dashboard() {
             </div>
           </div>
 
+          {/* Bot Statistics Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-1 gap-6 mb-6">
+           
+            
+            <div>
+              <h2 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Most Active Agents</h2>
+              <div className={`${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'} border rounded-xl shadow-sm p-6`}>
+                {topBots.length > 0 ? (
+                  <div className="space-y-4">
+                    {topBots.map(bot => (
+                      <div key={bot.id} className={`flex items-center justify-between p-3 rounded-lg ${darkMode ? 'bg-neutral-700' : 'bg-gray-50'}`}>
+                        <div className="flex items-center">
+                          <div className={`text-2xl mr-3 p-2 rounded-lg ${darkMode ? 'bg-neutral-600' : 'bg-gray-100'}`}>{bot.avatar}</div>
+                          <div>
+                            <h3 className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{bot.name}</h3>
+                            <div className="flex items-center">
+                              <span className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                {bot.executionCount} executions
+                              </span>
+                              <span className="mx-2 text-gray-400">•</span>
+                              <span className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                {bot.type}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className={`text-sm font-semibold ${
+                          bot.type === 'support' 
+                            ? (darkMode ? 'text-blue-400' : 'text-blue-600')
+                            : bot.type === 'sales'
+                              ? (darkMode ? 'text-green-400' : 'text-green-600')
+                              : (darkMode ? 'text-purple-400' : 'text-purple-600')
+                        }`}>
+                          {bot.averageTpuConsumption} TPU
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    <p>No active agents yet</p>
+                  </div>
+                )}
+                
+                <div className="mt-6 flex justify-end">
+                  <Link to="/my-bots" className={`text-sm ${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}>
+                    Manage agents →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Credits Usage Section */}
           <div className="mb-6">
             <h2 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Credits Usage</h2>
             <div className={`${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'} border rounded-xl shadow-sm p-6`}>
               <div className="flex flex-col">
                 <div className="flex justify-between items-center mb-2">
-                  <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>TPU-Seconds Available</span>
+                  <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Agent Hours Used</span>
                   <span className={`text-sm font-medium ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
-                    {formatCredits(credits)} / 2.59M
+                    {formatHours(usedTpuHours)} / {formatHours(tpuHours)} hours
                   </span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mb-4">
+                <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mb-1">
                   <div 
                     className="bg-blue-600 h-2.5 rounded-full" 
-                    style={{ width: `${Math.min(100, (credits / 2592000) * 100)}%` }}
+                    style={{ width: `${Math.min(100, (usedTpuSeconds / tpuSeconds) * 100)}%` }}
                   ></div>
+                </div>
+                <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400 mb-4">
+                  <span>TPU-Seconds: {formatCredits(usedTpuSeconds)} / {formatCredits(tpuSeconds)}</span>
+                  <span>{Math.round((usedTpuSeconds / tpuSeconds) * 100)}% used</span>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
@@ -174,30 +248,140 @@ export default function Dashboard() {
                   
                   <div className={`p-4 rounded-lg ${darkMode ? 'bg-neutral-700' : 'bg-gray-100'}`}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className={`text-xs font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>This Week</span>
-                      <span className={`text-xs font-medium ${darkMode ? 'text-yellow-400' : 'text-yellow-600'}`}>12.5K</span>
+                      <span className={`text-xs font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Usage This Week</span>
+                      <span className={`text-xs font-medium ${darkMode ? 'text-yellow-400' : 'text-yellow-600'}`}>14.5K</span>
                     </div>
                     <div className="w-full bg-gray-300 rounded-full h-1.5 dark:bg-gray-600">
-                      <div className="bg-yellow-500 h-1.5 rounded-full" style={{ width: '35%' }}></div>
+                      <div className="bg-yellow-500 h-1.5 rounded-full" style={{ width: '45%' }}></div>
                     </div>
                   </div>
                   
                   <div className={`p-4 rounded-lg ${darkMode ? 'bg-neutral-700' : 'bg-gray-100'}`}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className={`text-xs font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>This Month</span>
-                      <span className={`text-xs font-medium ${darkMode ? 'text-purple-400' : 'text-purple-600'}`}>86.4K</span>
+                      <span className={`text-xs font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Usage This Month</span>
+                      <span className={`text-xs font-medium ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>67.3K</span>
                     </div>
                     <div className="w-full bg-gray-300 rounded-full h-1.5 dark:bg-gray-600">
-                      <div className="bg-purple-500 h-1.5 rounded-full" style={{ width: '65%' }}></div>
+                      <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: '67%' }}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Agent TPU Consumption Section */}
+          <div className="mb-6">
+            <h2 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Agent TPU Consumption</h2>
+            <div className={`${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'} border rounded-xl shadow-sm p-6`}>
+              <div className="flex justify-between items-center mb-4">
+                <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                  Each agent type has a different average TPU consumption per execution batch:
+                </p>
+                <div className={`text-xs font-medium px-3 py-1 rounded-lg ${darkMode ? 'bg-blue-900 text-blue-300' : 'bg-blue-100 text-blue-800'}`}>
+                  Based on real usage data
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className={`p-4 rounded-lg border ${darkMode ? 'bg-neutral-700 border-neutral-600' : 'bg-gray-50 border-gray-200'}`}>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className={`text-2xl p-2 rounded-lg ${darkMode ? 'bg-neutral-600' : 'bg-gray-100'}`}>🤖</div>
+                    <h3 className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>Customer Support</h3>
+                  </div>
+                  <div className={`text-sm mb-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Handles customer inquiries and support requests
+                  </div>
+                  <div className={`w-full bg-gray-200 rounded-full h-2 dark:bg-gray-600 mb-2`}>
+                    <div className="bg-blue-500 h-2 rounded-full" style={{ width: '38%' }}></div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <svg className="size-4 mr-1.5 text-blue-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                      </svg>
+                      <span className={`text-sm font-semibold ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                        270 TPU
+                      </span>
+                    </div>
+                    <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                      ~4.5 min/execution
                     </div>
                   </div>
                 </div>
                 
-                <div className="mt-4 flex justify-end">
-                  <Link to="#" className={`text-sm ${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}>
-                    View detailed usage →
-                  </Link>
+                <div className={`p-4 rounded-lg border ${darkMode ? 'bg-neutral-700 border-neutral-600' : 'bg-gray-50 border-gray-200'}`}>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className={`text-2xl p-2 rounded-lg ${darkMode ? 'bg-neutral-600' : 'bg-gray-100'}`}>🤑</div>
+                    <h3 className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>Finance & Sales</h3>
+                  </div>
+                  <div className={`text-sm mb-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Helps with product recommendations and sales
+                  </div>
+                  <div className={`w-full bg-gray-200 rounded-full h-2 dark:bg-gray-600 mb-2`}>
+                    <div className="bg-green-500 h-2 rounded-full" style={{ width: '64%' }}></div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <svg className="size-4 mr-1.5 text-green-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                      </svg>
+                      <span className={`text-sm font-semibold ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
+                        450 TPU
+                      </span>
+                    </div>
+                    <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                      ~7.5 min/execution
+                    </div>
+                  </div>
                 </div>
+                
+                <div className={`p-4 rounded-lg border ${darkMode ? 'bg-neutral-700 border-neutral-600' : 'bg-gray-50 border-gray-200'}`}>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className={`text-2xl p-2 rounded-lg ${darkMode ? 'bg-neutral-600' : 'bg-gray-100'}`}>✍️</div>
+                    <h3 className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>Marketing & Content</h3>
+                  </div>
+                  <div className={`text-sm mb-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Generates media content and marketing materials
+                  </div>
+                  <div className={`w-full bg-gray-200 rounded-full h-2 dark:bg-gray-600 mb-2`}>
+                    <div className="bg-purple-500 h-2 rounded-full" style={{ width: '100%' }}></div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <svg className="size-4 mr-1.5 text-purple-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                      </svg>
+                      <span className={`text-sm font-semibold ${darkMode ? 'text-purple-400' : 'text-purple-600'}`}>
+                        700 TPU
+                      </span>
+                    </div>
+                    <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                      ~11.7 min/execution
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-6 p-4 rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
+                <h4 className={`text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  How to optimize your TPU usage:
+                </h4>
+                <ul className={`text-xs space-y-1 list-disc pl-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <li>Configure agents with specific, focused tasks instead of broad responsibilities</li>
+                  <li>Use content templates when possible to reduce generation time</li>
+                  <li>Schedule batch operations during off-peak hours</li>
+                  <li>Monitor usage patterns to identify optimization opportunities</li>
+                </ul>
+              </div>
+              
+              <div className={`mt-4 flex items-center justify-between`}>
+                <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-600'}`}>
+                  * TPU consumption is based on real usage data and may vary depending on specific tasks and complexity.
+                </div>
+                <Link to="/subscription-plans" className={`text-xs font-medium ${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}>
+                  Upgrade for more TPU credits →
+                </Link>
               </div>
             </div>
           </div>

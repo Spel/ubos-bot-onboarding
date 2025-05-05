@@ -22,7 +22,12 @@ export default function Onboarding() {
   
   // Redirect to login if not authenticated
   useEffect(() => {
-    if (!isAuthenticated) {
+    // Save authentication status to ensure it's available for redirects
+    if (isAuthenticated) {
+      saveToStorage(STORAGE_KEYS.IS_AUTHENTICATED, true);
+    }
+    
+    if (!isAuthenticated && !getFromStorage(STORAGE_KEYS.EMAIL, null)) {
       console.log('User not authenticated, redirecting to login');
       navigate('/login');
     }
@@ -82,12 +87,16 @@ export default function Onboarding() {
   
   // Handle completion of the flow
   const handleComplete = () => {
+    // Ensure authentication is saved before redirecting
+    saveToStorage(STORAGE_KEYS.IS_AUTHENTICATED, true);
+    
+    // Use window.location.href for a full page reload and navigation
     if (isFromDashboard) {
       // If from dashboard, go back to My Bots page
-      navigate("/my-bots");
+      window.location.href = "/my-bots";
     } else {
       // Otherwise go to dashboard
-      navigate("/dashboard");
+      window.location.href = "/dashboard";
     }
   };
 

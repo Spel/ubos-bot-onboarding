@@ -15,12 +15,20 @@ export default function Login() {
     
     // Simulate authentication
     setTimeout(() => {
-      // Save user info to localStorage
+      // Save user info to localStorage with proper logging
+      console.log('Saving authentication data to localStorage');
+      
+      // Save email to both keys for compatibility
       saveToStorage(STORAGE_KEYS.USER_EMAIL, email);
+      saveToStorage(STORAGE_KEYS.EMAIL, email);
+      
+      // Set authentication flag
       saveToStorage(STORAGE_KEYS.IS_AUTHENTICATED, true);
       
-      // Navigate to onboarding
-      navigate("/onboarding");
+      console.log('Authentication data saved, redirecting to onboarding');
+      
+      // Use window.location.href for a full page reload and navigation
+      window.location.href = "/onboarding";
       setLoading(false);
     }, 1000);
   };

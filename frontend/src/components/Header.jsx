@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 export default function Header({ darkMode, toggleDarkMode }) {
   return (
@@ -46,6 +47,23 @@ export default function Header({ darkMode, toggleDarkMode }) {
             </div>
           </div>
           <div className="flex flex-row items-center justify-end gap-2">
+            {/* Subscription Plans Link */}
+            <Link 
+              to="/subscription-plans"
+              className={`py-2 px-3 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent ${
+                darkMode 
+                  ? 'text-neutral-300 hover:bg-neutral-800 focus:bg-neutral-800' 
+                  : 'text-gray-700 hover:bg-gray-100 focus:bg-gray-100'
+              }`}
+            >
+              <svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 10c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2" />
+                <path d="M10 16c-1.1 0-2-.9-2-2v-4c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2" />
+                <rect x="14" y="14" width="8" height="8" rx="2" />
+              </svg>
+              Subscription Plans
+            </Link>
+            
             {/* Theme Toggle Button */}
             <button 
               type="button" 

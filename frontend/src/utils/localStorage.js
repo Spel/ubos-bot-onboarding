@@ -6,6 +6,7 @@
 export const STORAGE_KEYS = {
   USER_NAME: 'ubos_user_name',
   USER_EMAIL: 'ubos_user_email',
+  EMAIL: 'ubos_email', // Added for compatibility with App.jsx
   IS_AUTHENTICATED: 'ubos_is_authenticated',
   DOMAIN: 'ubos_domain',
   DARK_MODE: 'ubos_dark_mode',

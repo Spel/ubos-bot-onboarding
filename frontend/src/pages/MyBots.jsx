@@ -17,7 +17,10 @@ export default function MyBots() {
     description: "",
     type: "support",
     status: "active",
-    avatar: "🤖"
+    avatar: "🤖",
+    averageTpuConsumption: 0,
+    executionCount: 0,
+    lastExecuted: null
   });
 
   // Toggle dark mode function
@@ -64,7 +67,10 @@ export default function MyBots() {
       description: "",
       type: "support",
       status: "active",
-      avatar: "🤖"
+      avatar: "🤖",
+      averageTpuConsumption: 0,
+      executionCount: 0,
+      lastExecuted: null
     });
     setShowAddModal(false);
     loadBots();
@@ -126,7 +132,7 @@ export default function MyBots() {
               <div key={bot.id} className={`${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'} border rounded-xl shadow-sm overflow-hidden`}>
                 <div className="p-4">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="text-3xl">{bot.avatar}</div>
+                    <div className={`text-3xl p-2 rounded-lg ${darkMode ? 'bg-neutral-700' : 'bg-gray-100'}`}>{bot.avatar}</div>
                     <div>
                       <h3 className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{bot.name}</h3>
                       <span className={`inline-flex items-center gap-1.5 py-0.5 px-2 rounded-full text-xs font-medium ${
@@ -139,10 +145,48 @@ export default function MyBots() {
                     </div>
                   </div>
                   <p className={`text-sm mb-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{bot.description}</p>
-                  <div className={`text-xs mb-2 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
-                    Created: {new Date(bot.createdAt).toLocaleDateString()}
+                  
+                  {/* Bot Stats */}
+                  <div className={`grid grid-cols-2 gap-2 mb-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    {/* Average TPU Consumption */}
+                    <div className={`p-2 rounded-lg ${darkMode ? 'bg-neutral-700' : 'bg-gray-100'}`}>
+                      <div className="flex items-center">
+                        <svg className="size-4 mr-1.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                        <span className="text-xs font-medium">Avg. Cost:</span>
+                      </div>
+                      <div className={`mt-1 text-sm font-semibold ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                        {bot.averageTpuConsumption} TPU
+                      </div>
+                    </div>
+                    
+                    {/* Execution Count */}
+                    <div className={`p-2 rounded-lg ${darkMode ? 'bg-neutral-700' : 'bg-gray-100'}`}>
+                      <div className="flex items-center">
+                        <svg className="size-4 mr-1.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M6 9l6 6 6-6"></path>
+                        </svg>
+                        <span className="text-xs font-medium">Executions:</span>
+                      </div>
+                      <div className={`mt-1 text-sm font-semibold ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
+                        {bot.executionCount || 0}
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center">
+                  
+                  <div className="flex justify-between items-center">
+                    <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                      Created: {new Date(bot.createdAt).toLocaleDateString()}
+                    </div>
+                    {bot.lastExecuted && (
+                      <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                        Last run: {new Date(bot.lastExecuted).toLocaleDateString()}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center mt-2">
                     <Link 
                       to={bot.url} 
                       className={`text-xs font-medium ${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} flex items-center gap-1`}
@@ -301,6 +345,26 @@ export default function MyBots() {
                   ))}
                 </div>
               </div>
+              <div>
+                <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Average TPU Consumption</label>
+                <div className="flex items-center">
+                  <input 
+                    type="number" 
+                    value={newBot.averageTpuConsumption} 
+                    onChange={(e) => setNewBot({...newBot, averageTpuConsumption: parseInt(e.target.value) || 0})}
+                    className={`w-full px-3 py-2 border rounded-lg ${
+                      darkMode 
+                        ? 'bg-neutral-700 border-neutral-600 text-white focus:border-blue-500' 
+                        : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500'
+                    }`}
+                    placeholder="Enter average TPU consumption"
+                  />
+                  <div className="ml-2 text-sm text-gray-500">TPU</div>
+                </div>
+                <p className={`mt-1 text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                  Typical values: Support (270), Sales (450), Content (700)
+                </p>
+              </div>
             </div>
             <div className="flex justify-end gap-2 mt-6">
               <button 
@@ -426,6 +490,26 @@ export default function MyBots() {
                     </button>
                   ))}
                 </div>
+              </div>
+              <div>
+                <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Average TPU Consumption</label>
+                <div className="flex items-center">
+                  <input 
+                    type="number" 
+                    value={currentBot.averageTpuConsumption} 
+                    onChange={(e) => setCurrentBot({...currentBot, averageTpuConsumption: parseInt(e.target.value) || 0})}
+                    className={`w-full px-3 py-2 border rounded-lg ${
+                      darkMode 
+                        ? 'bg-neutral-700 border-neutral-600 text-white focus:border-blue-500' 
+                        : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500'
+                    }`}
+                    placeholder="Enter average TPU consumption"
+                  />
+                  <div className="ml-2 text-sm text-gray-500">TPU</div>
+                </div>
+                <p className={`mt-1 text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                  Typical values: Support (270), Sales (450), Content (700)
+                </p>
               </div>
             </div>
             <div className="flex justify-end gap-2 mt-6">

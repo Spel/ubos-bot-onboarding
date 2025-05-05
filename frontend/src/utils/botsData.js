@@ -7,35 +7,86 @@ const sampleBots = [
   {
     id: '1',
     name: 'Customer Support Bot',
-    description: 'Handles customer inquiries and support requests',
+    description: 'Handles customer inquiries and support requests with 24/7 availability',
     createdAt: new Date('2025-04-15').toISOString(),
     status: 'active',
     type: 'support',
     avatar: '🤖',
     domain: 'support.ubos.bot',
-    url: '/bot/customer-support-bot'
+    url: '/bot/customer-support-bot',
+    averageTpuConsumption: 270,
+    executionCount: 1254,
+    lastExecuted: new Date('2025-05-04').toISOString()
   },
   {
     id: '2',
     name: 'Sales Assistant',
-    description: 'Helps with product recommendations and sales',
+    description: 'Helps with product recommendations and sales conversions',
     createdAt: new Date('2025-04-20').toISOString(),
     status: 'active',
     type: 'sales',
     avatar: '🤑',
     domain: 'sales.ubos.bot',
-    url: '/bot/sales-assistant'
+    url: '/bot/sales-assistant',
+    averageTpuConsumption: 450,
+    executionCount: 876,
+    lastExecuted: new Date('2025-05-05').toISOString()
   },
   {
     id: '3',
     name: 'Content Creator',
-    description: 'Generates blog posts and social media content',
+    description: 'Generates blog posts and social media content with media integration',
     createdAt: new Date('2025-04-25').toISOString(),
-    status: 'inactive',
+    status: 'active',
     type: 'content',
     avatar: '✍️',
     domain: 'content.ubos.bot',
-    url: '/bot/content-creator'
+    url: '/bot/content-creator',
+    averageTpuConsumption: 700,
+    executionCount: 532,
+    lastExecuted: new Date('2025-05-03').toISOString()
+  },
+  {
+    id: '4',
+    name: 'Financial Advisor',
+    description: 'Provides financial analysis and investment recommendations',
+    createdAt: new Date('2025-04-10').toISOString(),
+    status: 'active',
+    type: 'sales',
+    avatar: '💰',
+    domain: 'finance.ubos.bot',
+    url: '/bot/financial-advisor',
+    averageTpuConsumption: 560,
+    executionCount: 423,
+    lastExecuted: new Date('2025-05-02').toISOString()
+  },
+  {
+    id: '5',
+    name: 'Marketing Strategist',
+    description: 'Creates marketing campaigns and analyzes performance metrics',
+    createdAt: new Date('2025-04-05').toISOString(),
+    status: 'active',
+    type: 'content',
+    avatar: '📊',
+    domain: 'marketing.ubos.bot',
+    url: '/bot/marketing-strategist',
+    averageTpuConsumption: 680,
+    executionCount: 367,
+    lastExecuted: new Date('2025-05-01').toISOString()
+  },
+  {
+    id: '6',
+    name: 'Technical Support',
+    description: 'Resolves technical issues and provides troubleshooting guidance',
+    createdAt: new Date('2025-03-28').toISOString(),
+    status: 'inactive',
+    type: 'support',
+    avatar: '🔧',
+    domain: 'techsupport.ubos.bot',
+    url: '/bot/technical-support',
+    averageTpuConsumption: 320,
+    executionCount: 1089,
+    lastExecuted: new Date('2025-04-28').toISOString()
   }
 ];
 
@@ -90,12 +141,23 @@ export const addBot = (bot) => {
   const domain = bot.domain || `${botNameSlug}.ubos.bot`;
   const url = bot.url || `/bot/${botNameSlug}`;
   
+  // Set default average TPU consumption based on bot type
+  let averageTpuConsumption = 270; // Default for support
+  if (bot.type === 'sales') {
+    averageTpuConsumption = 450;
+  } else if (bot.type === 'content') {
+    averageTpuConsumption = 700;
+  }
+  
   const newBot = {
     ...bot,
     id: Date.now().toString(),
     createdAt: new Date().toISOString(),
     domain,
-    url
+    url,
+    averageTpuConsumption: bot.averageTpuConsumption || averageTpuConsumption,
+    executionCount: 0,
+    lastExecuted: null
   };
   
   const updatedBots = [...bots, newBot];
