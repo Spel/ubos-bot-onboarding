@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
+import Home from './pages/Home';
 import MyBots from './pages/MyBots';
 import Onboarding from './pages/Onboarding';
 import Login from './pages/Login';
 import Chat from './pages/Chat';
+import GlobalChat from './pages/GlobalChat';
 import BotLanding from './pages/BotLanding';
 import SubscriptionPlans from './pages/SubscriptionPlans';
 import CostComparison from './pages/CostComparison';
@@ -78,18 +80,20 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={isLoggedIn ? <Navigate to="/dashboard" /> : <Login />} />
+        <Route path="/login" element={isLoggedIn ? <Navigate to="/home" /> : <Login />} />
         <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="/home" element={isLoggedIn ? <Home /> : <Navigate to="/login" />} />
         <Route path="/dashboard" element={isLoggedIn ? <Dashboard /> : <Navigate to="/login" />} />
         <Route path="/my-bots" element={isLoggedIn ? <MyBots /> : <Navigate to="/login" />} />
         <Route path="/chat/:botId" element={isLoggedIn ? <Chat /> : <Navigate to="/login" />} />
+        <Route path="/global-chat" element={isLoggedIn ? <GlobalChat /> : <Navigate to="/login" />} />
         <Route path="/bot/:botId" element={isLoggedIn ? <BotLanding /> : <Navigate to="/login" />} />
         <Route path="/subscription-plans" element={isLoggedIn ? <SubscriptionPlans /> : <Navigate to="/login" />} />
         <Route path="/cost-comparison" element={isLoggedIn ? <CostComparison /> : <Navigate to="/login" />} />
         <Route path="/admin" element={isLoggedIn ? <Admin /> : <Navigate to="/login" />} />
         <Route path="/templates" element={isLoggedIn ? <Templates /> : <Navigate to="/login" />} />
         <Route path="/create-agent/:templateId?" element={isLoggedIn ? <CreateAgent /> : <Navigate to="/login" />} />
-        <Route path="*" element={<Navigate to={isLoggedIn ? "/dashboard" : "/login"} />} />
+        <Route path="*" element={<Navigate to={isLoggedIn ? "/home" : "/login"} />} />
       </Routes>
     </Router>
   );

@@ -112,12 +112,9 @@ export default function Onboarding() {
       // If from dashboard, go back to My Bots page
       navigate('/my-bots', { replace: true });
     } else {
-      // Otherwise go to dashboard
+      // Otherwise go to home page
       // Using state to indicate we're coming from onboarding to prevent redirection issues
-      navigate('/dashboard', { 
-        replace: true,
-        state: { fromOnboarding: true }
-      });
+      navigate('/home', { replace: true, state: { fromOnboarding: true } });
     }
   };
 
@@ -328,7 +325,7 @@ export default function Onboarding() {
               className="w-full mt-4 py-2 px-4 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
               onClick={handleComplete}
             >
-              {isFromDashboard ? "Go to My Bots" : "Go to Dashboard"}
+              {isFromDashboard ? "Go to My Bots" : "Go to Home"}
             </button>
           </>
         )}

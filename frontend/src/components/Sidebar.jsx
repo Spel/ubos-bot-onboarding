@@ -69,12 +69,37 @@ export default function Sidebar({ darkMode }) {
         {/* Navigation */}
         <nav className="p-3 w-full flex flex-col flex-wrap flex-grow">
           <ul className="space-y-1.5">
+            {/* Main Section Header */}
+            <li className="pb-2">
+              <div className="px-2">
+                <h3 className={`text-xs font-semibold uppercase ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Main</h3>
+              </div>
+            </li>
+            
+            {/* Home */}
+            <li>
+              <Link 
+                to="/home" 
+                className={`flex items-center gap-x-3.5 py-2 px-2.5 text-sm rounded-md ${
+                  currentPath === '/home' || currentPath === '/' 
+                    ? (darkMode ? 'bg-neutral-700 text-white' : 'bg-gray-100 text-blue-600')
+                    : (darkMode ? 'text-gray-400 hover:bg-neutral-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600')
+                }`}
+              >
+                <svg className="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                  <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                Home
+              </Link>
+            </li>
+            
             {/* Dashboard */}
             <li>
               <Link 
                 to="/dashboard" 
                 className={`flex items-center gap-x-3.5 py-2 px-2.5 text-sm rounded-md ${
-                  currentPath === '/dashboard' || currentPath === '/' 
+                  currentPath === '/dashboard' 
                     ? (darkMode ? 'bg-neutral-700 text-white' : 'bg-gray-100 text-blue-600')
                     : (darkMode ? 'text-gray-400 hover:bg-neutral-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600')
                 }`}
@@ -124,6 +149,37 @@ export default function Sidebar({ darkMode }) {
                 </svg>
                 My Bots
               </Link>
+            </li>
+            
+            {/* Chat Section Header */}
+            <li className="pt-5 pb-2">
+              <div className="px-2">
+                <h3 className={`text-xs font-semibold uppercase ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Chat</h3>
+              </div>
+            </li>
+            
+            {/* Global Chat */}
+            <li>
+              <Link 
+                to="/global-chat" 
+                className={`flex items-center gap-x-3.5 py-2 px-2.5 text-sm rounded-md ${
+                  currentPath === '/global-chat' 
+                    ? (darkMode ? 'bg-neutral-700 text-white' : 'bg-gray-100 text-blue-600')
+                    : (darkMode ? 'text-gray-400 hover:bg-neutral-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600')
+                }`}
+              >
+                <svg className="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                Chat
+              </Link>
+            </li>
+            
+            {/* Admin Section Header */}
+            <li className="pt-5 pb-2">
+              <div className="px-2">
+                <h3 className={`text-xs font-semibold uppercase ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Administration</h3>
+              </div>
             </li>
             
             {/* Admin */}
