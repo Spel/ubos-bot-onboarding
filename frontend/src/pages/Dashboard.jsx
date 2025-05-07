@@ -3,13 +3,23 @@ import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import { saveToStorage, getFromStorage, STORAGE_KEYS } from "../utils/localStorage";
 import { getBotCount, getActiveBotCount, getBotsByType, getBots } from "../utils/botsData";
+import { getUserProfile } from "../utils/userStorage";
+import { getDashboardData, getUsageStatistics, getRecentActivities } from "../utils/metricStorage";
 import { Link, useLocation } from "react-router-dom";
 
 export default function Dashboard() {
   const location = useLocation();
   const [darkMode, setDarkMode] = useState(getFromStorage(STORAGE_KEYS.DARK_MODE, false));
+  
+  // Get data from localStorage
+  const userProfile = getUserProfile();
+  const dashboardData = getDashboardData();
+  const usageStats = getUsageStatistics();
+  const recentActivities = getRecentActivities();
+  
+  // TPU-related state
   const [tpuSeconds, setTpuSeconds] = useState(getFromStorage(STORAGE_KEYS.CREDITS, 2592000)); // Default to 2,592,000 TPU-seconds (720 hours)
-  const [usedTpuSeconds, setUsedTpuSeconds] = useState(0);
+  const [usedTpuSeconds, setUsedTpuSeconds] = useState(getFromStorage('ubos_used_credits', 0));
   const [remainingTpuSeconds, setRemainingTpuSeconds] = useState(0);
   const [tpuHours, setTpuHours] = useState(0);
   const [usedTpuHours, setUsedTpuHours] = useState(0);
@@ -90,9 +100,9 @@ export default function Dashboard() {
     types.sales = getBotsByType('sales').length;
     types.content = getBotsByType('content').length;
     
-    // Get credits and calculate usage (67% used)
+    // Get credits and calculate usage
     const userTpuSeconds = getFromStorage(STORAGE_KEYS.CREDITS, 2592000);
-    const usedTpuSecs = Math.round(userTpuSeconds * 0.67);
+    const usedTpuSecs = getFromStorage('ubos_used_credits', Math.round(userTpuSeconds * 0.67));
     const remainingTpuSecs = userTpuSeconds - usedTpuSecs;
     
     // Convert to hours
@@ -118,7 +128,7 @@ export default function Dashboard() {
   return (
     <div className={`min-h-screen ${darkMode ? 'bg-neutral-900' : 'bg-gray-50'}`}>
       <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-      <Sidebar darkMode={darkMode} />
+        <Sidebar darkMode={darkMode} />
       <div style={{ paddingLeft: '16rem', paddingTop: '61px' }}>
         <main className="w-full overflow-y-auto p-4">
           {/* Dashboard Header */}

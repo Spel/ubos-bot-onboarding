@@ -52,30 +52,20 @@ export default function Sidebar({ darkMode }) {
       <div className="flex flex-col h-full overflow-y-auto">
         {/* Logo */}
         <div className="px-6 pt-6 pb-4 flex items-center">
+          
           <Link to="/" className={`flex items-center gap-1 text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-            <svg className="w-7 h-7" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="14" cy="14" r="5" className="fill-blue-600" />
-            </svg>
-            <span>UBOS</span>
+          <svg width="17" height="19" viewBox="0 0 17 19" fill="none" ><path d="M16.8817 11.255L14.0684 12.6617L11.2551 11.255L14.0684 9.84839L16.8817 11.255Z" fill="#66CBE2"></path><path d="M14.0683 12.6617C13.5453 13.7063 12.7419 14.5847 11.748 15.1986C10.7541 15.8125 9.60898 16.1376 8.44079 16.1376C7.2726 16.1376 6.12746 15.8125 5.13357 15.1986C4.13969 14.5847 3.33628 13.7063 2.81329 12.6617L5.62662 11.2551C5.88803 11.7776 6.28974 12.217 6.78678 12.5241C7.28381 12.8312 7.85653 12.9939 8.44079 12.9939C9.02505 12.9939 9.59777 12.8312 10.0948 12.5241C10.5918 12.217 10.9936 11.7776 11.255 11.2551L14.0683 12.6617Z" fill="#41B1E5"></path><path d="M5.62665 11.255L2.81332 12.6617L0 11.255L2.81332 9.84839L5.62665 11.255Z" fill="#66CBE2"></path><path d="M16.8816 11.2551C16.8824 11.2613 16.8824 11.2676 16.8816 11.2738C16.5443 13.2675 15.5119 15.0773 13.9674 16.3824C12.423 17.6875 10.4662 18.4036 8.4442 18.4036C6.42216 18.4036 4.46544 17.6875 2.92098 16.3824C1.37652 15.0773 0.344097 13.2675 0.0067749 11.2738C0.00757591 11.2676 0.00757591 11.2613 0.0067749 11.2551L2.8201 12.6617C3.34309 13.7063 4.14649 14.5847 5.14038 15.1986C6.13427 15.8125 7.27941 16.1376 8.4476 16.1376C9.61579 16.1376 10.7609 15.8125 11.7548 15.1986C12.7487 14.5847 13.5521 13.7063 14.0751 12.6617L16.8816 11.2551Z" fill="#5279BC"></path><path d="M14.0684 2.81334V8.44169L11.2551 7.03333V1.40668L14.0684 2.81334Z" fill="#41B1E5"></path><path d="M16.8817 1.40666L14.0684 2.81332L11.2551 1.40666L14.0684 0L16.8817 1.40666Z" fill="#66CBE2"></path><path d="M16.8817 1.40668V7.03333L14.0684 8.44169V2.81334L16.8817 1.40668Z" fill="#5279BC"></path><path d="M5.62665 1.40666L2.81332 2.81332L0 1.40666L2.81332 0L5.62665 1.40666Z" fill="#66CBE2"></path><path d="M2.81332 2.81334V8.44169L0 7.03333V1.40668L2.81332 2.81334Z" fill="#41B1E5"></path><path d="M5.62662 1.40668V7.03333L2.81329 8.44169V2.81334L5.62662 1.40668Z" fill="#5279BC"></path></svg>
+            <span className="px-2"> Agentspace</span>
           </Link>
         </div>
         
         {/* UBOS Bots Title */}
-        <div className="px-6 pb-4">
-          <h2 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>UBOS Bots</h2>
-          <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>AI Bot Management</p>
-        </div>
-        
+      
         {/* Navigation */}
         <nav className="p-3 w-full flex flex-col flex-wrap flex-grow">
           <ul className="space-y-1.5">
             {/* Main Section Header */}
-            <li className="pb-2">
-              <div className="px-2">
-                <h3 className={`text-xs font-semibold uppercase ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Main</h3>
-              </div>
-            </li>
-            
+          
             {/* Home */}
             <li>
               <Link 
@@ -147,7 +137,7 @@ export default function Sidebar({ darkMode }) {
                   <circle cx="15" cy="9" r="2" />
                   <path d="M6 15h12" />
                 </svg>
-                My Bots
+                My Agents
               </Link>
             </li>
             

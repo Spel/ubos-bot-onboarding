@@ -14,7 +14,18 @@ export const STORAGE_KEYS = {
   BOTS: 'ubos_bots',
   BOT_SETTINGS: 'ubos_bot_settings',
   CHAT_HISTORY: 'ubos_chat_history',
-  CREDITS: 'ubos_credits'
+  CREDITS: 'ubos_credits',
+  // Additional data keys
+  USER_SETTINGS: 'ubos_user_settings',
+  USER_PROFILE: 'ubos_user_profile',
+  DASHBOARD_DATA: 'ubos_dashboard_data',
+  BOT_METRICS: 'ubos_bot_metrics',
+  BOT_TEMPLATES: 'ubos_bot_templates',
+  BOT_CATEGORIES: 'ubos_bot_categories',
+  USER_PREFERENCES: 'ubos_user_preferences',
+  NOTIFICATIONS: 'ubos_notifications',
+  RECENT_ACTIVITIES: 'ubos_recent_activities',
+  USAGE_STATISTICS: 'ubos_usage_statistics'
 };
 
 /**

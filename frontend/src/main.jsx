@@ -1,23 +1,22 @@
-import { StrictMode, useEffect } from 'react'
+import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './tailwind-fix.css'
 import './styles.css'
 import './index.css'
 import './preline.css'
 import App from './App.jsx'
-import { HSStaticMethods } from 'preline/preline'
+import 'preline/preline'
+import { initUserData } from './utils/userStorage'
+import { initMetricsData } from './utils/metricStorage'
+import { initBotData } from './utils/botStorage'
 
-function AppWithPreline() {
-  useEffect(() => {
-    // Initialize Preline UI components
-    HSStaticMethods.autoInit();
-  }, []);
+// Initialize all local storage data
+initUserData();
+initMetricsData();
+initBotData();
 
-  return (
-    <StrictMode>
-      <App />
-    </StrictMode>
-  );
-}
-
-createRoot(document.getElementById('root')).render(<AppWithPreline />);
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
