@@ -51,12 +51,34 @@ export default function MyBots() {
 
     // Load bots
     loadBots();
+
+    // Add click handler to close menus when clicking outside
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.dropdown-menu') && !event.target.closest('button')) {
+        setBots(prevBots => prevBots.map(bot => ({
+          ...bot,
+          showMenu: false
+        })));
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    
+    // Clean up event listener
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
   }, []);
 
   // Load bots from storage
   const loadBots = () => {
     const botsList = getBots();
-    setBots(botsList);
+    // Initialize showMenu property for each bot
+    const botsWithMenu = botsList.map(bot => ({
+      ...bot,
+      showMenu: false
+    }));
+    setBots(botsWithMenu);
   };
 
   // Handle add bot
@@ -75,6 +97,14 @@ export default function MyBots() {
     setShowAddModal(false);
     loadBots();
   };
+  
+  // Close all menus
+  const closeAllMenus = () => {
+    setBots(prevBots => prevBots.map(bot => ({
+      ...bot,
+      showMenu: false
+    })));
+  };
 
   // Handle edit bot
   const handleEditBot = () => {
@@ -91,6 +121,8 @@ export default function MyBots() {
     if (confirm("Are you sure you want to delete this bot?")) {
       deleteBot(id);
       loadBots();
+    } else {
+      closeAllMenus();
     }
   };
 
@@ -98,6 +130,7 @@ export default function MyBots() {
   const openEditModal = (bot) => {
     setCurrentBot({...bot});
     setShowEditModal(true);
+    closeAllMenus();
   };
 
   return (
@@ -129,8 +162,67 @@ export default function MyBots() {
           {/* Bots Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
             {bots.map(bot => (
-              <div key={bot.id} className={`${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'} border rounded-xl shadow-sm overflow-hidden`}>
-                <div className="p-4">
+              <div key={bot.id} className={`${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'} border rounded-xl shadow-sm overflow-hidden flex flex-col h-[320px]`}>
+                <div className="p-4 flex-grow relative">
+                  <div className="relative dropdown-menu">
+                    {bot.showMenu ? (
+                      <div 
+                        className={`absolute top-0 right-0 mt-8 w-48 rounded-lg shadow-lg overflow-hidden z-10 ${darkMode ? 'bg-neutral-700 border-neutral-600' : 'bg-white border-gray-200'} border`}
+                      >
+                        <button 
+                          onClick={() => openEditModal(bot)}
+                          className={`w-full p-3 text-left flex items-center gap-2 ${darkMode ? 'hover:bg-neutral-600 text-gray-200' : 'hover:bg-gray-50 text-gray-700'}`}
+                        >
+                          <svg className="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M12 20h9"></path>
+                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                          </svg>
+                          Quick Edit
+                        </button>
+                        <button 
+                          onClick={() => {
+                            closeAllMenus();
+                            navigate(`/manage-agent/${bot.id}`);
+                          }}
+                          className={`w-full p-3 text-left flex items-center gap-2 ${darkMode ? 'hover:bg-neutral-600 text-gray-200' : 'hover:bg-gray-50 text-gray-700'}`}
+                        >
+                          <svg className="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                          </svg>
+                          Edit
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteBot(bot.id)}
+                          className={`w-full p-3 text-left flex items-center gap-2 ${darkMode ? 'hover:bg-neutral-600 text-red-400' : 'hover:bg-gray-50 text-red-600'}`}
+                        >
+                          <svg className="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M3 6h18"></path>
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                          </svg>
+                          Delete
+                        </button>
+                      </div>
+                    ) : null}
+                    <button 
+                      onClick={() => {
+                        const updatedBots = bots.map(b => ({
+                          ...b,
+                          showMenu: b.id === bot.id ? !b.showMenu : false
+                        }));
+                        setBots(updatedBots);
+                      }}
+                      className={`absolute top-0 right-0 p-2 rounded-full ${darkMode ? 'hover:bg-neutral-700 text-gray-400' : 'hover:bg-gray-100 text-gray-700'}`}
+                    >
+                      <svg className="size-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="1"></circle>
+                        <circle cx="19" cy="12" r="1"></circle>
+                        <circle cx="5" cy="12" r="1"></circle>
+                      </svg>
+                    </button>
+                  </div>
+                  
                   <div className="flex items-center gap-3 mb-3">
                     <div className={`text-3xl p-2 rounded-lg ${darkMode ? 'bg-neutral-700' : 'bg-gray-100'}`}>{bot.avatar}</div>
                     <div>
@@ -175,20 +267,11 @@ export default function MyBots() {
                     </div>
                   </div>
                   
-                  <div className="flex justify-between items-center">
-                    <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
-                      Created: {new Date(bot.createdAt).toLocaleDateString()}
-                    </div>
-                    {bot.lastExecuted && (
-                      <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
-                        Last run: {new Date(bot.lastExecuted).toLocaleDateString()}
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center mt-2">
+                  <div className="flex items-center mt-3">
                     <Link 
                       to={bot.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
                       className={`text-xs font-medium ${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} flex items-center gap-1`}
                     >
                       <svg className="size-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -199,28 +282,17 @@ export default function MyBots() {
                     </Link>
                   </div>
                 </div>
-                <div className={`flex border-t ${darkMode ? 'border-neutral-700' : 'border-gray-200'}`}>
-                  <button 
-                    onClick={() => openEditModal(bot)}
-                    className={`flex-1 p-3 inline-flex justify-center items-center gap-2 ${darkMode ? 'hover:bg-neutral-700 text-gray-400' : 'hover:bg-gray-50 text-gray-700'}`}
-                  >
-                    <svg className="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 20h9"></path>
-                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                    </svg>
-                    Edit
-                  </button>
-                  <button 
-                    onClick={() => handleDeleteBot(bot.id)}
-                    className={`flex-1 p-3 inline-flex justify-center items-center gap-2 ${darkMode ? 'hover:bg-neutral-700 text-red-400' : 'hover:bg-gray-50 text-red-600'}`}
-                  >
-                    <svg className="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M3 6h18"></path>
-                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                    </svg>
-                    Delete
-                  </button>
+                <div className={`mt-auto border-t ${darkMode ? 'border-neutral-700' : 'border-gray-200'}`}>
+                  <div className="p-3 flex justify-between items-center">
+                    <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                      Created: {new Date(bot.createdAt).toLocaleDateString()}
+                    </div>
+                    {bot.lastExecuted && (
+                      <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                        Last run: {new Date(bot.lastExecuted).toLocaleDateString()}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
