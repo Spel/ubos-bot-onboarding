@@ -99,151 +99,148 @@ export default function EditAgent() {
 
   const tabs = [
     { id: 'general', label: 'General' },
-    { id: 'team', label: 'Team' },
+    // { id: 'team', label: 'Team' },
     { id: 'prompt', label: 'Prompt Engineering' },
     { id: 'knowledge', label: 'Knowledge Base' },
     { id: 'integrations', label: 'Integrations' },
-    { id: 'analytics', label: 'Analytics' },
-    { id: 'creator', label: 'Agent Creator' },
+    // { id: 'analytics', label: 'Analytics' },
+    // { id: 'creator', label: 'Agent Creator' },
   ];
 
   return (
     <div className={`min-h-screen ${darkMode ? 'bg-neutral-900' : 'bg-gray-50'}`}>
-      <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+      {/* Top navigation area */}
+      <div className="sticky top-0 z-10">
+        <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+      </div>
       <Sidebar darkMode={darkMode} />
       
       {/* Main content area */}
-      <div style={{ paddingLeft: '16rem', paddingTop: '61px' }}> {/* Changed to match Home page layout */}
-        {/* Top navigation area */}
-        <div className="sticky top-0 z-10">
-          <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-        </div>
-
-        {/* Main content with chat panel */}
-        <div className={`w-full transition-all duration-300 ease-in-out ${isCreatorChatOpen ? 'pr-[30%]' : 'pr-0'}`}>
-          <main className="p-6">
-            {/* Back button and Help button */}
-            <div className="mb-6 flex justify-between items-center">
-              <Link to="/" className={`inline-flex items-center ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}>
-                <svg className="mr-2 size-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M19 12H5M12 19l-7-7 7-7"/>
-                </svg>
-                Back to Dashboard
-              </Link>
-              
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => setIsCreatorChatOpen(!isCreatorChatOpen)}
-                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${darkMode 
-                    ? (isCreatorChatOpen ? 'bg-green-700 text-white' : 'bg-green-900/30 text-green-300 hover:bg-green-800/50') 
-                    : (isCreatorChatOpen ? 'bg-green-600 text-white' : 'bg-green-50 text-green-700 hover:bg-green-100')}`}
-                >
-                  <svg className="size-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                  </svg>
-                  {isCreatorChatOpen ? 'Hide Agent Chat' : 'Open Agent Chat'}
-                </button>
-              </div>
-            </div>
-            
-            {/* Page title */}
-            <div className="mb-6 flex items-center justify-between">
-              <div>
-                <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                  Edit Agent: {formData.name}
+      <div style={{ paddingLeft: '16rem', paddingTop: '61px' }}> 
+        <div className="flex">
+          {/* Main content area - scrollable */}
+          <div className={`transition-all duration-300 ease-in-out ${isCreatorChatOpen ? 'w-[70%]' : 'w-full'}`} style={{ height: 'calc(100vh - 61px)', overflowY: 'auto' }}>
+            <main className="p-6">
+              {/* Header with title and actions */}
+              <div className="mb-6 flex items-center justify-between">
+                <h1 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                  {formData.name}
                 </h1>
-                <p className={`mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Manage your agent settings and configuration
-                </p>
+                <div className="flex items-center gap-4">
+                  <button 
+                    onClick={() => setIsCreatorChatOpen(!isCreatorChatOpen)}
+                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${darkMode 
+                      ? (isCreatorChatOpen ? 'bg-green-700 text-white' : 'bg-green-900/30 text-green-300 hover:bg-green-800/50') 
+                      : (isCreatorChatOpen ? 'bg-green-600 text-white' : 'bg-green-50 text-green-700 hover:bg-green-100')}`}
+                  >
+                    <svg className="size-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    {isCreatorChatOpen ? 'Hide Agent Chat' : 'Open Agent Chat'}
+                  </button>
+                  <Link 
+                    to="/my-bots" 
+                    className={`inline-flex items-center gap-2 py-2 px-4 rounded-lg ${darkMode ? 'bg-neutral-700 hover:bg-neutral-600 text-neutral-100' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'} transition-colors text-sm font-medium`}
+                  >
+                    <svg className="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                    My Agents
+                  </Link>
+                </div>
               </div>
-              <Link 
-                to="/" 
-                className={`py-2 px-4 rounded-lg ${darkMode ? 'bg-neutral-700 hover:bg-neutral-600' : 'bg-gray-200 hover:bg-gray-300'} transition-colors text-sm font-medium`}
-              >
-                Cancel
-              </Link>
-            </div>
-            
-            {/* Tabs */}
-            <div className="mb-6 border-b pb-1 flex overflow-x-auto scrollbar-hide">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`py-2 px-4 font-medium text-sm border-b-2 ${activeTab === tab.id
-                    ? (darkMode ? 'border-blue-500 text-blue-400' : 'border-blue-600 text-blue-600')
-                    : (darkMode ? 'border-transparent text-gray-400 hover:text-gray-300' : 'border-transparent text-gray-500 hover:text-gray-700')
-                  } transition-colors`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-            
-            {/* Tab Content */}
-            <div>
-              {activeTab === 'general' && (
-                <GeneralTab 
-                  darkMode={darkMode} 
-                  formData={formData} 
-                  setFormData={setFormData}
-                  bot={bot}
-                  botId={botId}
-                />
-              )}
-              {activeTab === 'prompt' && (
-                <PromptTab darkMode={darkMode} />
-              )}
-              {activeTab === 'knowledge' && (
-                <KnowledgeTab darkMode={darkMode} />
-              )}
-              {activeTab === 'integrations' && (
-                <IntegrationsTab darkMode={darkMode} />
-              )}
-              {activeTab === 'analytics' && (
-                <AnalyticsTab darkMode={darkMode} />
-              )}
-              {activeTab === 'creator' && (
-                <CreatorTab 
-                  darkMode={darkMode}
-                  formData={formData}
-                  setFormData={setFormData}
-                  bot={bot}
-                  botId={botId}
-                />
-              )}
-              {activeTab === 'team' && (
-                <TeamTab 
-                  darkMode={darkMode}
-                  formData={formData}
-                  setFormData={setFormData}
-                  templates={templates}
-                  bot={bot}
-                  botId={botId}
-                />
-              )}
-            </div>
-          </main>
+              
+              {/* Tabs */}
+              <div className="mb-6 border-b pb-1 flex overflow-x-auto scrollbar-hide">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`py-2 px-4 font-medium text-sm border-b-2 ${activeTab === tab.id
+                      ? (darkMode ? 'border-blue-500 text-blue-400' : 'border-blue-600 text-blue-600')
+                      : (darkMode ? 'border-transparent text-gray-400 hover:text-gray-300' : 'border-transparent text-gray-500 hover:text-gray-700')
+                    } transition-colors`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+              
+              {/* Tab Content */}
+              <div>
+                {activeTab === 'general' && (
+                  <GeneralTab 
+                    darkMode={darkMode} 
+                    formData={formData} 
+                    setFormData={setFormData}
+                    bot={bot}
+                    botId={botId}
+                  />
+                )}
+                {activeTab === 'prompt' && (
+                  <PromptTab darkMode={darkMode} />
+                )}
+                {activeTab === 'knowledge' && (
+                  <KnowledgeTab darkMode={darkMode} />
+                )}
+                {activeTab === 'integrations' && (
+                  <IntegrationsTab 
+                    darkMode={darkMode} 
+                    bot={bot} 
+                    botId={botId} 
+                    formData={formData} 
+                    setFormData={setFormData} 
+                  />
+                )}
+                {activeTab === 'analytics' && (
+                  <AnalyticsTab darkMode={darkMode} />
+                )}
+                {activeTab === 'creator' && (
+                  <CreatorTab 
+                    darkMode={darkMode}
+                    formData={formData}
+                    setFormData={setFormData}
+                    bot={bot}
+                    botId={botId}
+                  />
+                )}
+                {activeTab === 'team' && (
+                  <TeamTab 
+                    darkMode={darkMode}
+                    formData={formData}
+                    setFormData={setFormData}
+                    templates={templates}
+                    bot={bot}
+                    botId={botId}
+                  />
+                )}
+              </div>
+            </main>
+          </div>
+
+          {/* Agent Chat Panel */}
+          <div className={`w-[30%] transition-all duration-300 ease-in-out ${
+            isCreatorChatOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 w-0'
+          } border-l ${darkMode ? 'border-neutral-700' : 'border-gray-200'}`}>
+            <AgentCreatorChat 
+              darkMode={darkMode}
+              isOpen={isCreatorChatOpen}
+              onClose={() => setIsCreatorChatOpen(false)}
+              formData={formData}
+              setFormData={setFormData}
+              bot={bot}
+              botId={botId}
+              activeTab={activeTab}
+              saveChanges={() => {
+                const updatedBot = {
+                  ...bot,
+                  ...formData
+                };
+                updateBot(botId, updatedBot);
+              }}
+            />
+          </div>
         </div>
-        
-        {/* Agent Chat (Combined) */}
-        <AgentCreatorChat 
-          darkMode={darkMode}
-          isOpen={isCreatorChatOpen}
-          onClose={() => setIsCreatorChatOpen(false)}
-          formData={formData}
-          setFormData={setFormData}
-          bot={bot}
-          botId={botId}
-          activeTab={activeTab}
-          saveChanges={() => {
-            const updatedBot = {
-              ...bot,
-              ...formData
-            };
-            updateBot(botId, updatedBot);
-          }}
-        />
       </div>
     </div>
   );

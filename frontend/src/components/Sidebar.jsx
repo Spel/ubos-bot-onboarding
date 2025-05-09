@@ -83,6 +83,25 @@ export default function Sidebar({ darkMode }) {
                 Home
               </Link>
             </li>
+
+            {/* Product
+            <li>
+              <Link 
+                to="/product" 
+                className={`flex items-center gap-x-3.5 py-2 px-2.5 text-sm rounded-md ${
+                  currentPath === '/product'
+                    ? (darkMode ? 'bg-neutral-700 text-white' : 'bg-gray-100 text-blue-600')
+                    : (darkMode ? 'text-gray-400 hover:bg-neutral-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600')
+                }`}
+              >
+                <svg className="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                  <path d="M2 17l10 5 10-5"/>
+                  <path d="M2 12l10 5 10-5"/>
+                </svg>
+                Product
+              </Link>
+            </li> */}
             
             {/* Dashboard */}
             <li>
@@ -138,6 +157,24 @@ export default function Sidebar({ darkMode }) {
                   <path d="M6 15h12" />
                 </svg>
                 My Agents
+              </Link>
+            </li>
+            
+            {/* My Company */}
+            <li>
+              <Link 
+                to="/company-management" 
+                className={`flex items-center gap-x-3.5 py-2 px-2.5 text-sm rounded-md ${
+                  currentPath === '/company-management' 
+                    ? (darkMode ? 'bg-neutral-700 text-white' : 'bg-gray-100 text-blue-600')
+                    : (darkMode ? 'text-gray-400 hover:bg-neutral-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600')
+                }`}
+              >
+                <svg className="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                  <path d="M9 22V12h6v10"></path>
+                </svg>
+                My Company
               </Link>
             </li>
             
@@ -264,4 +301,4 @@ export default function Sidebar({ darkMode }) {
       </div>
     </aside>
   );
-} 
+}

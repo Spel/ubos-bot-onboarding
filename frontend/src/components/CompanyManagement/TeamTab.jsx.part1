@@ -1,0 +1,202 @@
+import React, { useState, useEffect } from "react";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { getFromStorage, saveToStorage, STORAGE_KEYS } from "../../utils/localStorage";
+
+const TeamTab = ({
+  darkMode,
+  companyData,
+  setCompanyData
+}) => {
+  // Sample templates for team members
+  const [templates, setTemplates] = useState([
+    {
+      id: "support-agent",
+      name: "Support Agent",
+      description: "Handles customer inquiries and provides assistance",
+      icon: "🧑‍💼",
+      category: "support",
+      framework: "UBOS.ai"
+    },
+    {
+      id: "sales-agent",
+      name: "Sales Agent",
+      description: "Manages sales processes and customer relationships",
+      icon: "👨‍💼",
+      category: "sales",
+      framework: "UBOS.ai"
+    },
+    {
+      id: "marketing-agent",
+      name: "Marketing Agent",
+      description: "Creates and manages marketing campaigns",
+      icon: "👩‍💼",
+      category: "marketing",
+      framework: "UBOS.ai"
+    },
+    {
+      id: "research-agent",
+      name: "Research Agent",
+      description: "Conducts research and analysis",
+      icon: "🧠",
+      category: "research",
+      framework: "UBOS.ai"
+    },
+    {
+      id: "operations-agent",
+      name: "Operations Agent",
+      description: "Manages operational processes and workflows",
+      icon: "⚙️",
+      category: "operations",
+      framework: "UBOS.ai"
+    },
+    {
+      id: "hr-agent",
+      name: "HR Agent",
+      description: "Handles human resources and recruitment",
+      icon: "👥",
+      category: "hr",
+      framework: "UBOS.ai"
+    }
+  ]);
+
+  const [showAddMemberModal, setShowAddMemberModal] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [memberToDelete, setMemberToDelete] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showLeaderModal, setShowLeaderModal] = useState(false);
+  const [selectedLeader, setSelectedLeader] = useState(null);
+
+  // Ensure teamMembers is initialized
+  useEffect(() => {
+    if (!companyData.teamMembers) {
+      const updatedCompanyData = {
+        ...companyData,
+        teamMembers: []
+      };
+      setCompanyData(updatedCompanyData);
+      saveToStorage(STORAGE_KEYS.COMPANY_DATA, updatedCompanyData);
+    }
+  }, []);
+
+  // Get current team leader
+  const getCurrentLeader = () => {
+    if (!companyData.teamMembers || companyData.teamMembers.length === 0) {
+      return companyData;
+    }
+    
+    if (companyData.isTeamLeader) return companyData;
+    return companyData.teamMembers.find(m => m.isTeamLeader) || companyData;
+  };
+
+  // Handle drag end
+  const handleDragEnd = (result) => {
+    if (!result.destination) return;
+
+    const { source, destination } = result;
+
+    // If dropped in leader area (droppable-leader)
+    if (destination.droppableId === 'droppable-leader') {
+      const draggedMember = companyData.teamMembers[source.index];
+      handleChangeLeader(draggedMember);
+      return;
+    }
+
+    // If reordering team members
+    if (source.droppableId === 'droppable-members' && destination.droppableId === 'droppable-members') {
+      const items = Array.from(companyData.teamMembers || []);
+      const [reorderedItem] = items.splice(source.index, 1);
+      items.splice(destination.index, 0, reorderedItem);
+
+      const updatedCompanyData = {
+        ...companyData,
+        teamMembers: items
+      };
+
+      setCompanyData(updatedCompanyData);
+      saveToStorage(STORAGE_KEYS.COMPANY_DATA, updatedCompanyData);
+    }
+  };
+
+  // Handle adding a team member
+  const handleAddTeamMember = () => {
+    if (!selectedTemplate) return;
+
+    // Create a new team member from the selected template
+    const newMember = {
+      id: `team-${Date.now()}`,
+      name: selectedTemplate.name,
+      description: selectedTemplate.description,
+      avatar: selectedTemplate.icon,
+      type: selectedTemplate.category,
+      framework: selectedTemplate.framework,
+      templateId: selectedTemplate.id,
+      addedAt: new Date().toISOString(),
+      isTeamLeader: false
+    };
+
+    // Add to team members
+    const updatedTeamMembers = [...(companyData.teamMembers || []), newMember];
+
+    // Update company data
+    const updatedCompanyData = {
+      ...companyData,
+      teamMembers: updatedTeamMembers
+    };
+
+    setCompanyData(updatedCompanyData);
+    saveToStorage(STORAGE_KEYS.COMPANY_DATA, updatedCompanyData);
+
+    // Close modal and reset selection
+    setShowAddMemberModal(false);
+    setSelectedTemplate(null);
+  };
+
+  // Handle removing a team member
+  const handleRemoveTeamMember = (memberId) => {
+    setMemberToDelete(companyData.teamMembers.find(m => m.id === memberId));
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = () => {
+    const updatedTeamMembers = (companyData.teamMembers || []).filter(member => member.id !== memberToDelete.id);
+
+    // Update company data
+    const updatedCompanyData = {
+      ...companyData,
+      teamMembers: updatedTeamMembers
+    };
+
+    setCompanyData(updatedCompanyData);
+    saveToStorage(STORAGE_KEYS.COMPANY_DATA, updatedCompanyData);
+    
+    setShowDeleteModal(false);
+    setMemberToDelete(null);
+  };
+
+  // Handle changing team leader
+  const handleChangeLeader = (member) => {
+    setSelectedLeader(member);
+    setShowLeaderModal(true);
+  };
+
+  const confirmLeaderChange = () => {
+    // Update the team leader status
+    const updatedTeamMembers = (companyData.teamMembers || []).map(member => ({
+      ...member,
+      isTeamLeader: member.id === selectedLeader.id
+    }));
+
+    // Update the previous default agent to be a regular team member
+    const updatedCompanyData = {
+      ...companyData,
+      teamMembers: updatedTeamMembers,
+      isTeamLeader: selectedLeader.id === 'default'
+    };
+
+    // Update company data
+    setCompanyData(updatedCompanyData);
+    saveToStorage(STORAGE_KEYS.COMPANY_DATA, updatedCompanyData);
+    
+    setShowLeaderModal(false);
+    setSelectedLeader(null);
+  };
