@@ -170,6 +170,19 @@ export default function MyBots() {
                         className={`absolute top-0 right-0 mt-8 w-48 rounded-lg shadow-lg overflow-hidden z-10 ${darkMode ? 'bg-neutral-700 border-neutral-600' : 'bg-white border-gray-200'} border`}
                       >
                         <button 
+                          onClick={() => {
+                            closeAllMenus();
+                            navigate(`/view-agent/${bot.id}`);
+                          }}
+                          className={`w-full p-3 text-left flex items-center gap-2 ${darkMode ? 'hover:bg-neutral-600 text-gray-200' : 'hover:bg-gray-50 text-gray-700'}`}
+                        >
+                          <svg className="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                          </svg>
+                          View Agent
+                        </button>
+                        <button 
                           onClick={() => openEditModal(bot)}
                           className={`w-full p-3 text-left flex items-center gap-2 ${darkMode ? 'hover:bg-neutral-600 text-gray-200' : 'hover:bg-gray-50 text-gray-700'}`}
                         >
@@ -226,14 +239,26 @@ export default function MyBots() {
                   <div className="flex items-center gap-3 mb-3">
                     <div className={`text-3xl p-2 rounded-lg ${darkMode ? 'bg-neutral-700' : 'bg-gray-100'}`}>{bot.avatar}</div>
                     <div>
-                      <h3 className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{bot.name}</h3>
-                      <span className={`inline-flex items-center gap-1.5 py-0.5 px-2 rounded-full text-xs font-medium ${
-                        bot.status === 'active' 
-                          ? (darkMode ? 'bg-green-900 text-green-300' : 'bg-green-100 text-green-800') 
-                          : (darkMode ? 'bg-gray-800 text-gray-400' : 'bg-gray-100 text-gray-800')
-                      }`}>
-                        {bot.status === 'active' ? 'Active' : 'Inactive'}
-                      </span>
+                      <Link 
+                        to={`/view-agent/${bot.id}`}
+                        className={`font-semibold hover:underline ${darkMode ? 'text-white' : 'text-gray-800'}`}
+                      >
+                        {bot.name}
+                      </Link>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className={`inline-flex items-center gap-1.5 py-0.5 px-2 rounded-full text-xs font-medium ${
+                          bot.status === 'active' 
+                            ? (darkMode ? 'bg-green-900 text-green-300' : 'bg-green-100 text-green-800') 
+                            : (darkMode ? 'bg-gray-800 text-gray-400' : 'bg-gray-100 text-gray-800')
+                        }`}>
+                          {bot.status === 'active' ? 'Active' : 'Inactive'}
+                        </span>
+                        <span className={`inline-flex items-center gap-1.5 py-0.5 px-2 rounded-full text-xs font-medium ${
+                          darkMode ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-800'
+                        }`}>
+                          {bot.type || 'Support'}
+                        </span>
+                      </div>
                     </div>
                   </div>
                   <p className={`text-sm mb-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{bot.description}</p>

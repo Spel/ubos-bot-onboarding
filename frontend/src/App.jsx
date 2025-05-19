@@ -14,6 +14,7 @@ import Admin from './pages/Admin';
 import Templates from './pages/Templates';
 import CreateAgent from './pages/CreateAgent';
 import EditAgent from './pages/EditAgent';
+import AgentView from './pages/AgentView';
 import CompanyManagement from './pages/CompanyManagement';
 import ProductLanding from './pages/ProductLanding';
 import { getFromStorage, STORAGE_KEYS } from './utils/localStorage';
@@ -98,6 +99,7 @@ function App() {
         <Route path="/templates" element={isLoggedIn ? <Templates /> : <Navigate to="/login" />} />
         <Route path="/create-agent/:templateId?" element={isLoggedIn ? <CreateAgent /> : <Navigate to="/login" />} />
         <Route path="/manage-agent/:botId" element={isLoggedIn ? <EditAgent /> : <Navigate to="/login" />} />
+        <Route path="/view-agent/:botId" element={isLoggedIn ? <AgentView /> : <Navigate to="/login" />} />
         <Route path="/company-management" element={isLoggedIn ? <CompanyManagement /> : <Navigate to="/login" />} />
         <Route path="*" element={<Navigate to={isLoggedIn ? "/home" : "/login"} />} />
       </Routes>

@@ -1,0 +1,109 @@
+/* Novel Editor Custom Styles */
+
+/* Dark theme overrides */
+.novel-dark-theme {
+  --novel-highlight-default: #ffffff;
+  --novel-highlight-purple: #f6f3f8;
+  --novel-highlight-red: #fdebeb;
+  --novel-highlight-yellow: #fbf4a2;
+  --novel-highlight-blue: #c1ecf9;
+  --novel-highlight-green: #acf79f;
+  --novel-highlight-orange: #faebdd;
+  --novel-highlight-pink: #faf1f5;
+  --novel-highlight-gray: #f1f1ef;
+}
+
+.novel-dark-theme .novel-prose-wrapper {
+  background-color: #262626;
+  color: #e5e5e5;
+}
+
+.novel-dark-theme .novel-prose h1,
+.novel-dark-theme .novel-prose h2,
+.novel-dark-theme .novel-prose h3,
+.novel-dark-theme .novel-prose h4,
+.novel-dark-theme .novel-prose h5,
+.novel-dark-theme .novel-prose h6 {
+  color: #ffffff;
+}
+
+.novel-dark-theme .novel-prose a {
+  color: #60a5fa;
+}
+
+.novel-dark-theme .novel-prose blockquote {
+  border-left-color: #4b5563;
+  color: #9ca3af;
+}
+
+.novel-dark-theme .novel-prose code {
+  background-color: #374151;
+  color: #e5e5e5;
+}
+
+.novel-dark-theme .novel-prose pre {
+  background-color: #1f2937;
+}
+
+.novel-dark-theme .novel-prose-wrapper .novel-floating-menu {
+  background-color: #374151;
+  border-color: #4b5563;
+}
+
+.novel-dark-theme .novel-prose-wrapper .novel-floating-menu button {
+  color: #e5e5e5;
+}
+
+.novel-dark-theme .novel-prose-wrapper .novel-floating-menu button:hover {
+  background-color: #4b5563;
+}
+
+/* General customizations */
+.novel-editor-wrapper {
+  min-height: 300px;
+}
+
+.novel-prose-wrapper {
+  padding: 1rem;
+}
+
+.novel-prose {
+  font-family: inherit;
+}
+
+.novel-prose p {
+  margin-bottom: 0.75rem;
+}
+
+.novel-prose h1 {
+  font-size: 1.875rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.novel-prose h2 {
+  font-size: 1.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.novel-prose h3 {
+  font-size: 1.25rem;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.novel-prose ul, .novel-prose ol {
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.novel-prose blockquote {
+  font-style: italic;
+  padding-left: 1rem;
+}
+
+/* Fix toolbar positioning */
+.novel-floating-menu {
+  z-index: 50;
+}

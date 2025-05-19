@@ -1,0 +1,154 @@
+/* Rich Text Editor Styles */
+.ProseMirror {
+  outline: none;
+  min-height: 200px;
+  padding: 0.5rem 0;
+}
+
+.ProseMirror p {
+  margin-bottom: 0.75rem;
+}
+
+.ProseMirror h1, .ProseMirror h2, .ProseMirror h3, .ProseMirror h4, .ProseMirror h5, .ProseMirror h6 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.ProseMirror h1 {
+  font-size: 1.875rem;
+}
+
+.ProseMirror h2 {
+  font-size: 1.5rem;
+}
+
+.ProseMirror h3 {
+  font-size: 1.25rem;
+}
+
+.ProseMirror ul, .ProseMirror ol {
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.ProseMirror ul {
+  list-style-type: disc;
+}
+
+.ProseMirror ol {
+  list-style-type: decimal;
+}
+
+.ProseMirror blockquote {
+  border-left: 3px solid #e5e7eb;
+  padding-left: 1rem;
+  margin-left: 0;
+  margin-right: 0;
+  font-style: italic;
+}
+
+.ProseMirror code {
+  background-color: #f3f4f6;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-family: monospace;
+}
+
+.ProseMirror pre {
+  background-color: #f3f4f6;
+  padding: 0.75rem;
+  border-radius: 0.25rem;
+  overflow-x: auto;
+}
+
+.ProseMirror a {
+  color: #3b82f6;
+  text-decoration: underline;
+}
+
+/* Dark mode styles */
+.dark-editor {
+  color: #e5e5e5;
+}
+
+.dark-editor h1, 
+.dark-editor h2, 
+.dark-editor h3, 
+.dark-editor h4, 
+.dark-editor h5, 
+.dark-editor h6 {
+  color: white;
+}
+
+.dark-editor a {
+  color: #60a5fa;
+}
+
+.dark-editor blockquote {
+  border-left-color: #4b5563;
+  color: #9ca3af;
+}
+
+.dark-editor code {
+  background-color: #374151;
+  color: #e5e5e5;
+}
+
+.dark-editor pre {
+  background-color: #1f2937;
+}
+
+.dark-editor ul, .dark-editor ol {
+  color: #e5e5e5;
+}
+
+/* Placeholder styles */
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #adb5bd;
+  pointer-events: none;
+  height: 0;
+}
+
+/* Editor container styles */
+.editor-container {
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.editor-container.editor-focused {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Dark mode focus styles */
+.editor-container.editor-focused {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+}
+
+/* Menu bar button styles */
+.editor-menu-button {
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.editor-menu-button:hover {
+  background-color: #f3f4f6;
+}
+
+.editor-menu-button.is-active {
+  background-color: #e5e7eb;
+}
+
+.dark .editor-menu-button:hover {
+  background-color: #374151;
+}
+
+.dark .editor-menu-button.is-active {
+  background-color: #4b5563;
+}
