@@ -179,6 +179,16 @@ export default function MyBots() {
                           </svg>
                           Quick Edit
                         </button>
+                        <Link 
+                          to={`/agent/${bot.id}`}
+                          className={`w-full p-3 text-left flex items-center gap-2 ${darkMode ? 'hover:bg-neutral-600 text-gray-200' : 'hover:bg-gray-50 text-gray-700'}`}
+                        >
+                          <svg className="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                          </svg>
+                          View
+                        </Link>
                         <button 
                           onClick={() => {
                             closeAllMenus();
