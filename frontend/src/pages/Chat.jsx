@@ -20,6 +20,8 @@ export default function Chat() {
           <li><code>/code [language]</code> - Display formatted code block (e.g. "/code javascript")</li>
           <li><code>/list</code> - Generate a formatted bullet list</li>
           <li><code>/table</code> - Show data in a table format</li>
+          <li><code>/crud</code> - Display a CRUD management interface example</li>
+          <li><code>/dashboard</code> - Show an interactive dashboard example</li>
           <li><code>/help</code> - Show these instructions again</li>
         </ul>
       `,
@@ -38,8 +40,8 @@ export default function Chat() {
             className="message-content"
             dangerouslySetInnerHTML={{ 
               __html: DOMPurify.sanitize(content, { 
-                ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'ul', 'li', 'code', 'pre', 'table', 'tr', 'td', 'th', 'thead', 'tbody'],
-                ALLOWED_ATTR: ['href', 'target', 'rel', 'class']
+                ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'ul', 'li', 'code', 'pre', 'table', 'tr', 'td', 'th', 'thead', 'tbody', 'div', 'h2', 'h3', 'span', 'button', 'input'],
+                ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'type', 'placeholder', 'style']
               }) 
             }} 
           />
@@ -56,15 +58,7 @@ export default function Chat() {
     
     switch(command) {
       case '/help':
-        return `
-          <p>Available commands:</p>
-          <ul>
-            <li><code>/code [language]</code> - Display formatted code block</li>
-            <li><code>/list</code> - Generate a formatted bullet list</li>
-            <li><code>/table</code> - Show data in a table format</li>
-            <li><code>/help</code> - Show these instructions</li>
-          </ul>
-        `;
+        return getHelpContent();
       
       case '/code':
         return `
@@ -121,10 +115,183 @@ console.log(greet("User"));`
           </table>
         `;
       
+      case '/crud':
+        return `
+          <div class="space-y-4">
+            <h2 class="text-xl font-bold">User Management CRUD</h2>
+            
+            <div class="flex justify-between items-center">
+              <div class="flex gap-2">
+                <button class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Add New</button>
+                <button class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">Refresh</button>
+              </div>
+              <div class="relative">
+                <input type="text" placeholder="Search users..." class="px-4 py-2 border rounded-lg" />
+              </div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="min-w-full border-collapse">
+                <thead>
+                  <tr class="bg-gray-100">
+                    <th class="border p-2 text-left">ID</th>
+                    <th class="border p-2 text-left">Name</th>
+                    <th class="border p-2 text-left">Email</th>
+                    <th class="border p-2 text-left">Role</th>
+                    <th class="border p-2 text-left">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="hover:bg-gray-50">
+                    <td class="border p-2">1</td>
+                    <td class="border p-2">John Doe</td>
+                    <td class="border p-2">john@example.com</td>
+                    <td class="border p-2">Admin</td>
+                    <td class="border p-2">
+                      <div class="flex gap-2">
+                        <button class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">Edit</button>
+                        <button class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">Delete</button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr class="hover:bg-gray-50">
+                    <td class="border p-2">2</td>
+                    <td class="border p-2">Jane Smith</td>
+                    <td class="border p-2">jane@example.com</td>
+                    <td class="border p-2">User</td>
+                    <td class="border p-2">
+                      <div class="flex gap-2">
+                        <button class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">Edit</button>
+                        <button class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">Delete</button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="flex justify-between items-center">
+              <div class="text-sm text-gray-500">
+                Showing 2 of 2 entries
+              </div>
+              <div class="flex gap-2">
+                <button class="px-3 py-1 border rounded disabled:opacity-50">Previous</button>
+                <button class="px-3 py-1 bg-blue-500 text-white rounded">1</button>
+                <button class="px-3 py-1 border rounded disabled:opacity-50">Next</button>
+              </div>
+            </div>
+          </div>
+        `;
+
+      case '/dashboard':
+        return `
+          <div class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="bg-gradient-to-br from-purple-500 to-purple-600 p-4 rounded-lg text-white">
+                <div class="text-sm opacity-80">Total Users</div>
+                <div class="text-2xl font-bold">1,234</div>
+                <div class="text-sm mt-2">
+                  <span class="text-green-300">↑ 12%</span> vs last month
+                </div>
+              </div>
+              
+              <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-4 rounded-lg text-white">
+                <div class="text-sm opacity-80">Revenue</div>
+                <div class="text-2xl font-bold">$45,678</div>
+                <div class="text-sm mt-2">
+                  <span class="text-green-300">↑ 8%</span> vs last month
+                </div>
+              </div>
+              
+              <div class="bg-gradient-to-br from-green-500 to-green-600 p-4 rounded-lg text-white">
+                <div class="text-sm opacity-80">Active Projects</div>
+                <div class="text-2xl font-bold">27</div>
+                <div class="text-sm mt-2">
+                  <span class="text-red-300">↓ 3%</span> vs last month
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="font-bold mb-4">Recent Activity</h3>
+                <div class="space-y-3">
+                  <div class="flex items-center gap-3">
+                    <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                    <div>
+                      <div class="text-sm font-medium">New user registered</div>
+                      <div class="text-xs text-gray-500">2 minutes ago</div>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                    <div>
+                      <div class="text-sm font-medium">Project "Alpha" completed</div>
+                      <div class="text-xs text-gray-500">1 hour ago</div>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
+                    <div>
+                      <div class="text-sm font-medium">Server maintenance scheduled</div>
+                      <div class="text-xs text-gray-500">3 hours ago</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="font-bold mb-4">Top Projects</h3>
+                <div class="space-y-3">
+                  <div>
+                    <div class="flex justify-between text-sm mb-1">
+                      <span>Project Alpha</span>
+                      <span>85%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                      <div class="bg-green-500 h-2 rounded-full" style="width: 85%"></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-sm mb-1">
+                      <span>Project Beta</span>
+                      <span>65%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                      <div class="bg-blue-500 h-2 rounded-full" style="width: 65%"></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-sm mb-1">
+                      <span>Project Gamma</span>
+                      <span>40%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                      <div class="bg-yellow-500 h-2 rounded-full" style="width: 40%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
       default:
         return null;
     }
   };
+
+  const getHelpContent = () => `
+    <p>Available commands:</p>
+    <ul>
+      <li><code>/code [language]</code> - Display formatted code block</li>
+      <li><code>/list</code> - Generate a formatted bullet list</li>
+      <li><code>/table</code> - Show data in a table format</li>
+      <li><code>/crud</code> - Display a CRUD management interface example</li>
+      <li><code>/dashboard</code> - Show an interactive dashboard example</li>
+      <li><code>/help</code> - Show these instructions</li>
+    </ul>
+  `;
 
   const handleSendMessage = (e) => {
     e.preventDefault();

@@ -31,6 +31,29 @@ export default function GlobalChat() {
     }
   }, [darkMode]);
 
+  // Process special commands before sending to ChatInterface
+  const processMessage = (message) => {
+    const command = message.toLowerCase().split(' ')[0];
+    
+    switch(command) {
+      case '/code':
+      case '/list':
+      case '/table':
+      case '/crud':
+      case '/dashboard':
+      case '/help':
+        return {
+          text: message,
+          isHTML: true
+        };
+      default:
+        return {
+          text: message,
+          isHTML: false
+        };
+    }
+  };
+
   return (
     <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-neutral-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
       {/* Header */}
@@ -50,6 +73,18 @@ export default function GlobalChat() {
               singleAgentMode={false}
               showHeader={false}
               showSidebar={true}
+              processMessage={processMessage}
+              helpText={`
+                <p>Available commands:</p>
+                <ul>
+                  <li><code>/code [language]</code> - Display formatted code block</li>
+                  <li><code>/list</code> - Generate a formatted bullet list</li>
+                  <li><code>/table</code> - Show data in a table format</li>
+                  <li><code>/crud</code> - Display a CRUD management interface example</li>
+                  <li><code>/dashboard</code> - Show an interactive dashboard example</li>
+                  <li><code>/help</code> - Show these instructions</li>
+                </ul>
+              `}
             />
           </div>
         </div>
