@@ -2,11 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getBot } from "../utils/botsData";
 import { getFromStorage, STORAGE_KEYS } from "../utils/localStorage";
-import AgentViewHeader from "../components/AgentViewHeader";
-import AgentViewSidebar from "../components/AgentViewSidebar";
+import AgentViewOldHeader from "../components/AgentViewOldHeader";
+import AgentViewOldSidebar from "../components/AgentViewOldSidebar";
 import { FiUpload } from "react-icons/fi";
 
-export default function AgentView() {
+export default function AgentViewOld() {
   const { botId } = useParams();
   const [darkMode, setDarkMode] = useState(getFromStorage(STORAGE_KEYS.DARK_MODE, false));
   const [bot, setBot] = useState(null);
@@ -66,8 +66,8 @@ export default function AgentView() {
 
   return (
     <div className={`min-h-screen ${darkMode ? 'bg-neutral-900' : 'bg-gray-50'}`}>
-      <AgentViewHeader darkMode={darkMode} />
-      <AgentViewSidebar darkMode={darkMode} />
+      <AgentViewOldHeader darkMode={darkMode} />
+      <AgentViewOldSidebar darkMode={darkMode} />
       <div style={{ paddingLeft: '248px', paddingTop: '48px' }}>
         <main className="w-full overflow-y-auto p-6">
           {/* Knowledge Section Title */}

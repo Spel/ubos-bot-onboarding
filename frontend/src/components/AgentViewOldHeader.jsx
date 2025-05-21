@@ -1,7 +1,7 @@
 import React from 'react';
 import { FiSettings } from 'react-icons/fi';
 
-const AgentViewHeader = ({ darkMode }) => {
+const AgentViewOldHeader = ({ darkMode }) => {
   return (
     <header className={`fixed top-0 right-0 left-0 z-30 border-b ${darkMode ? 'bg-neutral-900 border-neutral-800' : 'bg-white border-gray-200'}`}
       style={{ marginLeft: '248px', height: '48px' }}>
@@ -55,4 +55,4 @@ const AgentViewHeader = ({ darkMode }) => {
   );
 };
 
-export default AgentViewHeader;
+export default AgentViewOldHeader;

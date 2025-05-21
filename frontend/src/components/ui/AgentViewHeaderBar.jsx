@@ -1,21 +1,15 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   ChevronLeft,
   Play,
   Hammer,
   Search,
-  ChevronDown,
+  ChevronDown
 } from "lucide-react";
-import { Button } from "../ui/button";
+import { Button } from "./button";
 
-const Header = ({ 
-  darkMode, 
-  bot, 
-  saved, 
-  setSaved, 
-  user = { name: 'User' } 
-}) => {
+export function AgentViewHeaderBar({ darkMode, saved, setSaved, user }) {
   const navigate = useNavigate();
 
   return (
@@ -31,11 +25,9 @@ const Header = ({
         </Button>
         <div className="flex items-center gap-2">
           <div className={`w-6 h-6 rounded-full ${darkMode ? 'bg-purple-800' : 'bg-purple-100'} flex items-center justify-center`}>
-            <span className={`text-xs ${darkMode ? 'text-purple-200' : 'text-purple-600'}`}>
-              {bot?.name ? bot.name.charAt(0).toUpperCase() : 'B'}
-            </span>
+            <span className={`text-xs ${darkMode ? 'text-purple-200' : 'text-purple-600'}`}>B</span>
           </div>
-          <span className="font-medium">{bot?.name || 'Bot'}</span>
+          <span className="font-medium">Bot</span>
           <ChevronDown className="h-4 w-4 text-gray-500" />
         </div>
         <span className={`text-sm ${saved ? 'text-green-500' : 'text-gray-500'}`}>
@@ -79,6 +71,4 @@ const Header = ({
       </div>
     </header>
   );
-};
-
-export default Header;
+}

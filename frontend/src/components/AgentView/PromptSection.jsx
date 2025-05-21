@@ -1,13 +1,18 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
+import { ChevronDown, Play, HelpCircle } from 'lucide-react';
+import { Button } from '../ui/button';
+import { updateBot } from "../../utils/botsData";
 
-const PromptTab = ({ darkMode }) => {
-  const [mode, setMode] = useState('balanced'); // creative, balanced, precise
-  const [model, setModel] = useState('gpt-4');
-  const [systemPrompt, setSystemPrompt] = useState('');
-  const [maxTokens, setMaxTokens] = useState(2000);
-  const [memoryType, setMemoryType] = useState('conversation'); // conversation, long-term, none
-  const [showPromptAssistant, setShowPromptAssistant] = useState(false);
-  const [promptSuggestions, setPromptSuggestions] = useState([]);
+export function PromptSection({ darkMode, bot }) {
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [formData, setFormData] = useState({
+    mode: 'balanced',
+    model: 'gpt-4',
+    systemPrompt: bot?.systemPrompt || '',
+    maxTokens: bot?.maxTokens || 2000,
+    memoryType: bot?.memoryType || 'conversation',
+  });
 
   const modeSettings = {
     creative: {
@@ -55,19 +60,6 @@ const PromptTab = ({ darkMode }) => {
       { id: 'claude-3-opus', label: 'Claude 3 Opus', description: 'Most capable Anthropic model' },
       { id: 'claude-3-sonnet', label: 'Claude 3 Sonnet', description: 'Balanced performance and speed' },
       { id: 'claude-3-haiku', label: 'Claude 3 Haiku', description: 'Fast and efficient model' }
-    ],
-    xai: [
-      { id: 'xai-1', label: 'xAI-1', description: 'General purpose xAI model' }
-    ],
-    meta: [
-      { id: 'llama-2-70b', label: 'Llama 2 70B', description: 'Most capable Llama model' },
-      { id: 'llama-2-13b', label: 'Llama 2 13B', description: 'Balanced Llama model' },
-      { id: 'llama-2-7b', label: 'Llama 2 7B', description: 'Efficient Llama model' }
-    ],
-    mistral: [
-      { id: 'mistral-large', label: 'Mistral Large', description: 'Most capable Mistral model' },
-      { id: 'mistral-medium', label: 'Mistral Medium', description: 'Balanced Mistral model' },
-      { id: 'mistral-small', label: 'Mistral Small', description: 'Efficient Mistral model' }
     ]
   };
 
@@ -104,51 +96,48 @@ const PromptTab = ({ darkMode }) => {
     }
   ];
 
-  const generatePromptSuggestions = () => {
-    setShowPromptAssistant(true);
-    // Simulated prompt suggestions - in a real app, these would come from an API
-    setPromptSuggestions([
-      {
-        template: "You are a helpful assistant specialized in customer support. You help users troubleshoot issues, answer questions about products and services, and maintain a friendly, professional demeanor.",
-        label: "Customer Support"
-      },
-      {
-        template: "You are a creative content generator who helps users write engaging content. You can adapt your tone and style based on the target audience and purpose.",
-        label: "Content Creation"
-      },
-      {
-        template: "You are a technical expert who helps users with programming, debugging, and software development. You provide clear explanations and code examples when appropriate.",
-        label: "Technical Assistant"
-      }
-    ]);
+  const handleChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSaving(true);
+
+    try {
+      const updatedBot = {
+        ...bot,
+        ...formData
+      };
+      
+      await updateBot(bot.id, updatedBot);
+      setSaveSuccess(true);
+      
+      setTimeout(() => {
+        setSaveSuccess(false);
+      }, 3000);
+    } catch (error) {
+      console.error('Error updating bot:', error);
+      alert('There was an error updating your bot. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
-    <div className={`space-y-6`}>
+    <div className="max-w-full mx-auto space-y-6">
       {/* System Prompt Section */}
       <div className={`p-6 rounded-xl ${darkMode ? 'bg-neutral-800' : 'bg-white'} shadow-sm`}>
-        <div className="flex justify-between items-start mb-4">
-          <h2 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-            System Prompt
-          </h2>
-          <button
-            onClick={generatePromptSuggestions}
-            className={`px-3 py-1.5 rounded-lg flex items-center gap-2 text-sm ${
-              darkMode 
-                ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                : 'bg-blue-500 hover:bg-blue-600 text-white'
-            }`}
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
-            </svg>
-            AI Assistant
-          </button>
-        </div>
+        <h2 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+          System Prompt
+        </h2>
         <div className="space-y-2">
           <textarea
-            value={systemPrompt}
-            onChange={(e) => setSystemPrompt(e.target.value)}
+            value={formData.systemPrompt}
+            onChange={(e) => handleChange('systemPrompt', e.target.value)}
             placeholder="Define how your agent should behave and what role it should take..."
             className={`w-full h-32 p-3 rounded-lg resize-none ${
               darkMode 
@@ -160,59 +149,6 @@ const PromptTab = ({ darkMode }) => {
             This prompt sets the foundation for how your agent will behave in all interactions.
           </p>
         </div>
-
-        {/* Prompt Assistant Modal */}
-        {showPromptAssistant && (
-          <>
-            <div 
-              className="fixed inset-0 bg-black/50 z-40"
-              onClick={() => setShowPromptAssistant(false)}
-            />
-            <div className={`fixed inset-x-0 top-1/2 -translate-y-1/2 mx-auto max-w-2xl p-6 rounded-xl z-50 ${darkMode ? 'bg-neutral-800' : 'bg-white'} shadow-xl`}>
-              <div className="flex justify-between items-center mb-4">
-                <h3 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                  AI Prompt Assistant
-                </h3>
-                <button
-                  onClick={() => setShowPromptAssistant(false)}
-                  className={`p-1 rounded-lg ${darkMode ? 'hover:bg-neutral-700' : 'hover:bg-gray-100'}`}
-                >
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              
-              <p className={`mb-4 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                Choose a template to start with, then customize it for your specific needs:
-              </p>
-
-              <div className="space-y-3">
-                {promptSuggestions.map((suggestion, index) => (
-                  <div
-                    key={index}
-                    className={`p-4 rounded-lg cursor-pointer border transition-colors ${
-                      darkMode 
-                        ? 'border-neutral-700 hover:border-blue-500 bg-neutral-900' 
-                        : 'border-gray-200 hover:border-blue-500 bg-gray-50'
-                    }`}
-                    onClick={() => {
-                      setSystemPrompt(suggestion.template);
-                      setShowPromptAssistant(false);
-                    }}
-                  >
-                    <h4 className={`font-medium mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                      {suggestion.label}
-                    </h4>
-                    <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                      {suggestion.template}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
       </div>
 
       {/* Model Selection */}
@@ -222,8 +158,8 @@ const PromptTab = ({ darkMode }) => {
         </h2>
         <div className="space-y-4">
           <select
-            value={model}
-            onChange={(e) => setModel(e.target.value)}
+            value={formData.model}
+            onChange={(e) => handleChange('model', e.target.value)}
             className={`w-full p-3 rounded-lg border ${
               darkMode 
                 ? 'bg-neutral-900 text-white border-neutral-700 focus:border-blue-500' 
@@ -240,13 +176,10 @@ const PromptTab = ({ darkMode }) => {
               </optgroup>
             ))}
           </select>
-          <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-            Select the AI model that will power your agent. Each model has different capabilities and pricing.
-          </div>
         </div>
       </div>
 
-      {/* Response Style and Memory Configuration in a 2-column grid */}
+      {/* Response Style and Memory Configuration */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Response Style */}
         <div className={`p-6 rounded-xl ${darkMode ? 'bg-neutral-800' : 'bg-white'} shadow-sm`}>
@@ -258,7 +191,7 @@ const PromptTab = ({ darkMode }) => {
               <div
                 key={key}
                 className={`relative flex items-center p-3 cursor-pointer rounded-lg border ${
-                  mode === key
+                  formData.mode === key
                     ? darkMode
                       ? 'border-blue-500 bg-blue-500/10'
                       : 'border-blue-500 bg-blue-50'
@@ -266,14 +199,14 @@ const PromptTab = ({ darkMode }) => {
                     ? 'border-neutral-700 hover:border-neutral-600'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
-                onClick={() => setMode(key)}
+                onClick={() => handleChange('mode', key)}
               >
                 <input
                   type="radio"
                   name="mode"
                   value={key}
-                  checked={mode === key}
-                  onChange={() => setMode(key)}
+                  checked={formData.mode === key}
+                  onChange={() => handleChange('mode', key)}
                   className="sr-only"
                 />
                 <div className={`${darkMode ? 'text-white' : 'text-gray-900'} mr-3`}>
@@ -298,11 +231,11 @@ const PromptTab = ({ darkMode }) => {
             Memory & Context
           </h2>
           <div className="space-y-4">
-            {memoryTypes.map((memType) => (
+            {memoryTypes.map((memory) => (
               <div
-                key={memType.id}
+                key={memory.id}
                 className={`relative flex items-center p-3 cursor-pointer rounded-lg border ${
-                  memoryType === memType.id
+                  formData.memoryType === memory.id
                     ? darkMode
                       ? 'border-blue-500 bg-blue-500/10'
                       : 'border-blue-500 bg-blue-50'
@@ -310,25 +243,25 @@ const PromptTab = ({ darkMode }) => {
                     ? 'border-neutral-700 hover:border-neutral-600'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
-                onClick={() => setMemoryType(memType.id)}
+                onClick={() => handleChange('memoryType', memory.id)}
               >
                 <input
                   type="radio"
                   name="memoryType"
-                  value={memType.id}
-                  checked={memoryType === memType.id}
-                  onChange={() => setMemoryType(memType.id)}
+                  value={memory.id}
+                  checked={formData.memoryType === memory.id}
+                  onChange={() => handleChange('memoryType', memory.id)}
                   className="sr-only"
                 />
                 <div className={`${darkMode ? 'text-white' : 'text-gray-900'} mr-3`}>
-                  {memType.icon}
+                  {memory.icon}
                 </div>
                 <div>
                   <h3 className={`font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                    {memType.label}
+                    {memory.label}
                   </h3>
                   <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                    {memType.description}
+                    {memory.description}
                   </p>
                 </div>
               </div>
@@ -337,38 +270,40 @@ const PromptTab = ({ darkMode }) => {
         </div>
       </div>
 
-      {/* Advanced Settings */}
+      {/* Max Tokens and Save Button */}
       <div className={`p-6 rounded-xl ${darkMode ? 'bg-neutral-800' : 'bg-white'} shadow-sm`}>
-        <h2 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-          Advanced Settings
-        </h2>
-        <div className="space-y-4">
-          <div>
-            <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-              Maximum Response Length
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+          <div className="flex-1">
+            <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-white' : 'text-gray-700'}`}>
+              Max Tokens
             </label>
             <input
-              type="range"
-              min="100"
-              max="4000"
-              step="100"
-              value={maxTokens}
-              onChange={(e) => setMaxTokens(Number(e.target.value))}
-              className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer"
+              type="number"
+              value={formData.maxTokens}
+              onChange={(e) => handleChange('maxTokens', e.target.value)}
+              className={`w-full p-3 rounded-lg border ${
+                darkMode 
+                  ? 'bg-neutral-900 text-white border-neutral-700 focus:border-blue-500' 
+                  : 'bg-white text-gray-900 border-gray-200 focus:border-blue-500'
+              } focus:ring-1 focus:ring-blue-500 outline-none transition-colors`}
             />
-            <div className="flex justify-between text-sm mt-1">
-              <span className={darkMode ? 'text-gray-400' : 'text-gray-500'}>
-                {maxTokens} tokens
-              </span>
-              <span className={darkMode ? 'text-gray-400' : 'text-gray-500'}>
-                (~{Math.round(maxTokens * 0.75)} words)
-              </span>
-            </div>
           </div>
+          <Button 
+            onClick={handleSubmit}
+            disabled={isSaving}
+            className={`${
+              darkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'
+            } text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50`}
+          >
+            {isSaving ? 'Saving...' : 'Save Changes'}
+          </Button>
+          {saveSuccess && (
+            <span className={`text-sm ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
+              Changes saved successfully!
+            </span>
+          )}
         </div>
       </div>
     </div>
   );
-};
-
-export default PromptTab;
+}

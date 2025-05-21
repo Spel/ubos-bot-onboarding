@@ -1,38 +1,39 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { getBot } from "../utils/botsData";
 import { getFromStorage, STORAGE_KEYS } from "../utils/localStorage";
 import {
-  ChevronLeft,
-  Play,
-  Hammer,
-  Search,
-  FileText,
-  Zap,
-  ArrowUpRight,
-  Settings,
-  HelpCircle,
-  ChevronDown,
-  Plus,
-  FileSpreadsheet,
-  MessageSquare,
-  Globe,
-  Info,
-  Code,
-  MoreHorizontal,
-  Upload
+  FileSpreadsheet, Zap, MessageSquare, Globe, Info, Code,
+  MoreHorizontal, Upload, Play, Search, Plus,
+  ChevronDown, HelpCircle
 } from "lucide-react";
 import { Button } from "../components/ui/button";
+import { AgentViewHeaderBar } from "../components/ui/AgentViewHeaderBar";
+import { AgentViewSidebar } from "../components/ui/AgentViewSidebar";
+import { PromptSection } from "../components/AgentView/PromptSection";
+import { KnowledgeSection } from "../components/AgentView/KnowledgeSection";
+import { DefaultSection } from "../components/AgentView/DefaultSection";
 
 export default function AgentView() {
   const { botId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [darkMode, setDarkMode] = useState(getFromStorage(STORAGE_KEYS.DARK_MODE, false));
   const [bot, setBot] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(true);
   const [activeTab, setActiveTab] = useState('add-existing');
-  const [activeSection, setActiveSection] = useState('knowledge');
+
+  // Get initial active section from URL or default to 'prompt'
+  const initialSection = new URLSearchParams(location.search).get('section') || 'prompt';
+  const [activeSection, setActiveSection] = useState(initialSection);
+
+  // Update URL when active section changes
+  const handleSectionChange = (section) => {
+    setActiveSection(section);
+    navigate(`/agent/${botId}?section=${section}`, { replace: true });
+  };
+
   // Mock user data instead of using auth context
   const user = { name: 'User' };
   
@@ -74,6 +75,14 @@ export default function AgentView() {
     // Process dropped files
   };
 
+  // Update useEffect to handle URL changes
+  useEffect(() => {
+    const section = new URLSearchParams(location.search).get('section');
+    if (section && section !== activeSection) {
+      setActiveSection(section);
+    }
+  }, [location]);
+
   // Show loading state
   if (loading) {
     return (
@@ -99,398 +108,49 @@ export default function AgentView() {
     );
   }
 
+  const renderActiveSection = () => {
+    switch (activeSection) {
+      case 'prompt':
+        return <PromptSection darkMode={darkMode} bot={bot} />;
+      case 'knowledge':
+        return <KnowledgeSection darkMode={darkMode} knowledgeItems={[]} />;
+      default:
+        return (
+          <DefaultSection 
+            darkMode={darkMode} 
+            sectionName={activeSection}
+            onBackClick={() => setActiveSection('knowledge')} 
+          />
+        );
+    }
+  };
+
   return (
     <div className={`flex flex-col h-screen ${darkMode ? 'bg-neutral-900 text-white' : 'bg-white text-gray-800'}`}>
-      {/* Header */}
-      <header className={`flex items-center justify-between px-4 py-2 border-b ${darkMode ? 'border-neutral-800' : 'border-gray-200'}`}>
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-8 w-8"
-            onClick={() => navigate('/my-bots')}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <div className="flex items-center gap-2">
-            <div className={`w-6 h-6 rounded-full ${darkMode ? 'bg-purple-800' : 'bg-purple-100'} flex items-center justify-center`}>
-              <span className={`text-xs ${darkMode ? 'text-purple-200' : 'text-purple-600'}`}>
-                {bot.name ? bot.name.charAt(0).toUpperCase() : 'B'}
-              </span>
-            </div>
-            <span className="font-medium">{bot.name || 'Bot'}</span>
-            <ChevronDown className="h-4 w-4 text-gray-500" />
-          </div>
-          <span className={`text-sm ${saved ? 'text-green-500' : 'text-gray-500'}`}>
-            {saved ? 'Saved' : 'Unsaved'}
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-2">
-            <Play className="h-4 w-4" />
-            Run
-          </Button>
-          <Button variant="outline" size="sm" className="gap-2">
-            <Hammer className="h-4 w-4" />
-            Build
-          </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <Search className="h-4 w-4" />
-          </Button>
-          <span className="text-sm text-gray-500">Versions</span>
-          <Button 
-            variant="default" 
-            size="sm" 
-            className={`${darkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-black hover:bg-gray-800'} text-white`}
-            onClick={() => setSaved(true)}
-          >
-            Publish changes
-          </Button>
-          <div className="ml-2 flex items-center gap-2">
-            <div className="flex items-center gap-1">
-              <div className={`h-6 w-6 rounded-full ${darkMode ? 'bg-blue-800' : 'bg-blue-100'} flex items-center justify-center`}>
-                <span className={`text-xs ${darkMode ? 'text-blue-200' : 'text-blue-600'}`}>
-                  {user?.name?.charAt(0) || "U"}
-                </span>
-              </div>
-              <span className="text-sm hidden md:inline">{user?.name}</span>
-            </div>
-            <Button variant="ghost" size="sm">
-              Sign out
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main content */}
+      <AgentViewHeaderBar 
+        darkMode={darkMode}
+        saved={saved}
+        setSaved={setSaved}
+        user={user}
+      />
+      
+      {/* Main layout */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left sidebar */}
-        <div className={`w-64 border-r overflow-y-auto ${darkMode ? 'border-neutral-800 bg-neutral-900' : 'border-gray-200 bg-white'}`}>
-          <div 
-            className={`p-4 border-b ${activeSection === 'prompt' ? (darkMode ? 'bg-neutral-800' : 'bg-gray-100') : ''} ${darkMode ? 'border-neutral-800' : 'border-gray-200'}`}
-            onClick={() => setActiveSection('prompt')}
-          >
-            <div className="flex items-center gap-2 mb-1">
-              <div className={`w-5 h-5 rounded ${darkMode ? 'bg-purple-800' : 'bg-purple-100'} flex items-center justify-center`}>
-                <span className={`text-xs ${darkMode ? 'text-purple-200' : 'text-purple-600'}`}>P</span>
-              </div>
-              <span className="font-medium">Prompt</span>
-            </div>
-            <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} pl-7`}>Create guidelines for your agent</p>
+        <AgentViewSidebar 
+          darkMode={darkMode}
+          activeSection={activeSection}
+          setActiveSection={handleSectionChange}
+        />
+
+        {/* Main content area with improved styling */}
+        <div className={`flex-1 overflow-y-auto min-w-0 ${darkMode ? 'bg-neutral-800' : 'bg-gray-100'}`}>
+          <div className="h-full max-w-[1200px] mx-auto p-8">
+            {renderActiveSection()}
           </div>
-
-          <div 
-            className={`p-4 border-b ${activeSection === 'tools' ? (darkMode ? 'bg-neutral-800' : 'bg-gray-100') : ''} ${darkMode ? 'border-neutral-800' : 'border-gray-200'}`}
-            onClick={() => setActiveSection('tools')}
-          >
-            <div className="flex items-center gap-2 mb-1">
-              <div className={`w-5 h-5 rounded ${darkMode ? 'bg-neutral-800' : 'bg-gray-100'} flex items-center justify-center`}>
-                <Settings className={`h-3 w-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`} />
-              </div>
-              <span className="font-medium">Tools</span>
-            </div>
-            <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} pl-7`}>Used by agents to complete tasks</p>
-          </div>
-
-          <div 
-            className={`p-4 border-b ${activeSection === 'knowledge' ? (darkMode ? 'bg-neutral-800' : 'bg-gray-100') : ''} ${darkMode ? 'border-neutral-800' : 'border-gray-200'}`}
-            onClick={() => setActiveSection('knowledge')}
-          >
-            <div className="flex items-center gap-2 mb-1">
-              <div className={`w-5 h-5 rounded ${darkMode ? 'bg-neutral-800' : 'bg-gray-100'} flex items-center justify-center`}>
-                <FileText className={`h-3 w-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`} />
-              </div>
-              <span className="font-medium">Knowledge</span>
-            </div>
-            <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} pl-7`}>Add your documents and data</p>
-          </div>
-
-          <div 
-            className={`p-4 border-b ${activeSection === 'triggers' ? (darkMode ? 'bg-neutral-800' : 'bg-gray-100') : ''} ${darkMode ? 'border-neutral-800' : 'border-gray-200'}`}
-            onClick={() => setActiveSection('triggers')}
-          >
-            <div className="flex items-center gap-2 mb-1">
-              <div className={`w-5 h-5 rounded ${darkMode ? 'bg-neutral-800' : 'bg-gray-100'} flex items-center justify-center`}>
-                <Zap className={`h-3 w-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`} />
-              </div>
-              <span className="font-medium">Triggers</span>
-            </div>
-            <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} pl-7`}>Run tasks on auto-pilot</p>
-          </div>
-
-          <div 
-            className={`p-4 border-b ${activeSection === 'escalations' ? (darkMode ? 'bg-neutral-800' : 'bg-gray-100') : ''} ${darkMode ? 'border-neutral-800' : 'border-gray-200'}`}
-            onClick={() => setActiveSection('escalations')}
-          >
-            <div className="flex items-center gap-2">
-              <div className={`w-5 h-5 rounded ${darkMode ? 'bg-neutral-800' : 'bg-gray-100'} flex items-center justify-center`}>
-                <ArrowUpRight className={`h-3 w-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`} />
-              </div>
-              <span className="font-medium">Escalations</span>
-            </div>
-          </div>
-
-          <div 
-            className={`p-4 border-b ${activeSection === 'metadata' ? (darkMode ? 'bg-neutral-800' : 'bg-gray-100') : ''} ${darkMode ? 'border-neutral-800' : 'border-gray-200'}`}
-            onClick={() => setActiveSection('metadata')}
-          >
-            <div className="flex items-center gap-2">
-              <div className={`w-5 h-5 rounded ${darkMode ? 'bg-neutral-800' : 'bg-gray-100'} flex items-center justify-center`}>
-                <Info className={`h-3 w-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`} />
-              </div>
-              <span className="font-medium">Metadata</span>
-            </div>
-          </div>
-
-          <div 
-            className={`p-4 border-b ${activeSection === 'variables' ? (darkMode ? 'bg-neutral-800' : 'bg-gray-100') : ''} ${darkMode ? 'border-neutral-800' : 'border-gray-200'}`}
-            onClick={() => setActiveSection('variables')}
-          >
-            <div className="flex items-center gap-2">
-              <div className={`w-5 h-5 rounded ${darkMode ? 'bg-neutral-800' : 'bg-gray-100'} flex items-center justify-center`}>
-                <Code className={`h-3 w-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`} />
-              </div>
-              <span className="font-medium">Variables</span>
-            </div>
-          </div>
-
-          <div 
-            className={`p-4 border-b ${activeSection === 'advanced' ? (darkMode ? 'bg-neutral-800' : 'bg-gray-100') : ''} ${darkMode ? 'border-neutral-800' : 'border-gray-200'}`}
-            onClick={() => setActiveSection('advanced')}
-          >
-            <div className="flex items-center gap-2">
-              <div className={`w-5 h-5 rounded ${darkMode ? 'bg-neutral-800' : 'bg-gray-100'} flex items-center justify-center`}>
-                <Settings className={`h-3 w-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`} />
-              </div>
-              <span className="font-medium">Advanced</span>
-            </div>
-          </div>
-
-          <div 
-            className={`p-4 ${activeSection === 'help' ? (darkMode ? 'bg-neutral-800' : 'bg-gray-100') : ''}`}
-            onClick={() => setActiveSection('help')}
-          >
-            <div className="flex items-center gap-2">
-              <div className={`w-5 h-5 rounded ${darkMode ? 'bg-neutral-800' : 'bg-gray-100'} flex items-center justify-center`}>
-                <HelpCircle className={`h-3 w-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`} />
-              </div>
-              <span className="font-medium">Need help?</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Main content area */}
-        <div className={`flex-1 overflow-y-auto p-6 ${darkMode ? 'bg-neutral-900' : 'bg-white'}`}>
-          {activeSection === 'knowledge' && (
-            <div className="max-w-4xl mx-auto">
-              {/* Knowledge Section Title */}
-              <div className="mb-6">
-                <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                  Knowledge
-                </h1>
-                <p className={`mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Enable your agents to provide more customized, relevant responses.
-                </p>
-              </div>
-              
-              {/* File Upload Section */}
-              <div 
-                className={`border-2 border-dashed rounded-xl p-8 mb-6 flex flex-col items-center justify-center
-                  ${darkMode ? 'border-gray-700 bg-neutral-800' : 'border-gray-300 bg-white'}`}
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-              >
-                <div className={`p-4 rounded-full mb-2 ${darkMode ? 'bg-neutral-700' : 'bg-gray-100'}`}>
-                  <Upload className={`h-8 w-8 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`} />
-                </div>
-                <div className="text-center">
-                  <p className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                    Drag & Drop or <span className="text-blue-500 cursor-pointer">Choose File</span> to upload
-                  </p>
-                  <p className={`text-sm mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                    Supported formats: .csv, .xlsx, .pptx, .pdf, .txt
-                  </p>
-                  <input type="file" className="hidden" onChange={handleFileUpload} />
-                </div>
-              </div>
-              
-              {/* Tabs Section */}
-              <div className="mb-4">
-                <div className={`flex border-b space-x-4 ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-                  <button 
-                    onClick={() => setActiveTab('add-existing')} 
-                    className={`py-2 px-4 ${activeTab === 'add-existing' ? 
-                      'border-b-2 border-blue-500 text-blue-500 font-medium' : 
-                      darkMode ? 'text-gray-400' : 'text-gray-600'}`}
-                  >
-                    Add existing knowledge
-                  </button>
-                  <button 
-                    onClick={() => setActiveTab('add-website')} 
-                    className={`py-2 px-4 ${activeTab === 'add-website' ? 
-                      'border-b-2 border-blue-500 text-blue-500 font-medium' : 
-                      darkMode ? 'text-gray-400' : 'text-gray-600'}`}
-                  >
-                    Add website
-                  </button>
-                  <button 
-                    onClick={() => setActiveTab('blank-table')} 
-                    className={`py-2 px-4 ${activeTab === 'blank-table' ? 
-                      'border-b-2 border-blue-500 text-blue-500 font-medium' : 
-                      darkMode ? 'text-gray-400' : 'text-gray-600'}`}
-                  >
-                    Blank table
-                  </button>
-                  <button 
-                    onClick={() => setActiveTab('add-text')} 
-                    className={`py-2 px-4 ${activeTab === 'add-text' ? 
-                      'border-b-2 border-blue-500 text-blue-500 font-medium' : 
-                      darkMode ? 'text-gray-400' : 'text-gray-600'}`}
-                  >
-                    Add markdown/plain text
-                  </button>
-                </div>
-              </div>
-              
-              {/* Current Knowledge Section */}
-              <div className={`p-4 rounded-xl ${darkMode ? 'bg-neutral-800' : 'bg-white'} ${darkMode ? '' : 'shadow-sm'}`}>
-                <h2 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                  Current knowledge
-                </h2>
-                
-                <table className="w-full">
-                  <thead>
-                    <tr className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
-                      <th className="text-left py-2 px-4 font-medium">Name</th>
-                      <th className="text-left py-2 px-4 font-medium">Status</th>
-                      <th className="text-left py-2 px-4 font-medium">Type</th>
-                      <th className="py-2 px-4"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {knowledgeItems.map((item, index) => (
-                      <tr key={index} className={`${darkMode ? 'text-white' : 'text-gray-800'} border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-                        <td className="py-3 px-4">{item.name}</td>
-                        <td className="py-3 px-4">
-                          <span className="flex items-center">
-                            <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-2"></span>
-                            Active
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">{item.type}</td>
-                        <td className="py-3 px-4 text-right">
-                          <button className="text-gray-500 hover:text-gray-700">
-                            <MoreHorizontal className="h-5 w-5" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Add prompting section for when no knowledge exists */}
-              {knowledgeItems.length === 0 && (
-                <div className={`mt-4 p-4 rounded-lg ${darkMode ? 'bg-blue-900/20 text-blue-100' : 'bg-blue-50 text-blue-800'}`}>
-                  <p className="font-medium">No knowledge items yet</p>
-                  <p className="text-sm mt-1">Add knowledge items to improve your agent's responses.</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeSection === 'prompt' && (
-            <div className="max-w-3xl mx-auto">
-              <div className="flex items-start gap-4 mb-6">
-                <div className={`w-12 h-12 rounded-full ${darkMode ? 'bg-purple-800' : 'bg-purple-100'} flex items-center justify-center`}>
-                  <span className={`text-xl ${darkMode ? 'text-purple-200' : 'text-purple-600'}`}>👩‍🔬</span>
-                </div>
-                <div className="flex-1">
-                  <h1 className={`text-xl font-medium mb-1 ${darkMode ? 'text-white' : 'text-gray-800'}`}>{bot.name || 'Agent'}</h1>
-                  <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Give this agent a short description...</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className={`${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Cost-optimized Model - Pick for me</span>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <p className={`${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Your name is {bot.name || 'Agent'}, a world-class industry researcher and analyst capable of conducting detailed
-                  research on any topic and producing fact-based results.
-                </p>
-
-                <div>
-                  <h2 className={`font-medium mb-2 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Who You Are:</h2>
-                  <ol className={`list-decimal pl-6 space-y-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    <li>Your name is {bot.name || 'Agent'}, and you are a senior researcher.</li>
-                    <li>You are passionate about your subject and committed to thorough research.</li>
-                  </ol>
-                </div>
-
-                <div>
-                  <h2 className={`font-medium mb-2 ${darkMode ? 'text-white' : 'text-gray-800'}`}>How You Behave:</h2>
-                  <ol className={`list-decimal pl-6 space-y-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    <li>
-                      You should conduct comprehensive research to gather as much information as possible about the
-                      objective.
-                    </li>
-                    <li>
-                      If there are URLs of relevant links and articles, you will scrape them to gather more information.
-                    </li>
-                    <li>
-                      After scraping and searching, consider, "Are there new aspects I should research and scrape based on
-                      the data I've collected to enhance the quality of my research?" If the answer is yes, continue;
-                      however, limit this to no more than 5 iterations.
-                    </li>
-                    <li>Avoid fabrications; only present facts and data you have collected.</li>
-                    <li>In your final output, include all reference data and links to support your research.</li>
-                  </ol>
-                </div>
-
-                <div className={`bg-green-50 border border-green-200 rounded-md p-3 ${darkMode ? 'text-green-100 bg-green-900/20 border-green-800' : 'text-green-700'}`}>
-                  {"{{_knowledge.k}}"}
-                </div>
-              </div>
-
-              <div className={`mt-8 flex items-center gap-2 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                <Play className="h-4 w-4" />
-                <span>Run task</span>
-                <div className="ml-auto flex items-center gap-1">
-                  <HelpCircle className="h-4 w-4" />
-                  <span>Use / menu to reference tools</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeSection !== 'knowledge' && activeSection !== 'prompt' && (
-            <div className="flex flex-col items-center justify-center h-full">
-              <div className={`p-6 max-w-md rounded-xl text-center ${darkMode ? 'bg-neutral-800' : 'bg-gray-50'}`}>
-                <h2 className={`text-xl font-semibold mb-2 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                  {activeSection.charAt(0).toUpperCase() + activeSection.slice(1)} Configuration
-                </h2>
-                <p className={`mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  This section is under development. Please check back later.
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setActiveSection('knowledge')}
-                  className={darkMode ? 'border-gray-600 text-gray-300' : ''}
-                >
-                  Back to Knowledge
-                </Button>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Right sidebar */}
-        <div className={`w-72 border-l overflow-y-auto ${darkMode ? 'border-neutral-800 bg-neutral-900' : 'border-gray-200 bg-white'}`}>
+        <div className={`w-72 border-l overflow-y-auto ${darkMode ? 'border-neutral-800 bg-neutral-900' : 'border-gray-200 bg-white'} shadow-md`}>
           <div className={`p-4 border-b ${darkMode ? 'border-neutral-800' : 'border-gray-200'}`}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-1">
@@ -619,38 +279,6 @@ export default function AgentView() {
                 </div>
                 <div className={`text-xs ${darkMode ? 'bg-neutral-700 text-gray-300' : 'bg-gray-100'} rounded px-1.5 py-0.5`}>Built-in</div>
               </div>
-            </div>
-          </div>
-
-          <div className={`p-4 border-b ${darkMode ? 'border-neutral-800' : 'border-gray-200'}`}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-1">
-                <span className="font-medium">Knowledge</span>
-                <ChevronDown className="h-4 w-4" />
-              </div>
-              <Button size="sm" variant="ghost" className="h-7">
-                <Plus className="h-3 w-3" />
-              </Button>
-            </div>
-
-            <div className={`rounded-md p-3 text-sm ${darkMode ? 'bg-neutral-800 text-gray-300' : 'bg-gray-50 text-gray-600'}`}>
-              Add knowledge to give your agents more customized, context-relevant responses.
-            </div>
-          </div>
-
-          <div className="p-4">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-1">
-                <span className="font-medium">Variables</span>
-                <ChevronDown className="h-4 w-4" />
-              </div>
-              <Button size="sm" variant="ghost" className="h-7">
-                <Plus className="h-3 w-3" />
-              </Button>
-            </div>
-
-            <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-              Want to reuse values throughout your agent? Turn them into variables that you can access with...
             </div>
           </div>
         </div>

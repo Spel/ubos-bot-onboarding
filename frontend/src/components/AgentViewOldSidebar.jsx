@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const AgentViewSidebar = ({ darkMode }) => {
+const AgentViewOldSidebar = ({ darkMode }) => {
   const menuItems = [
     { 
       label: 'Prompt', 
@@ -168,4 +168,4 @@ const AgentViewSidebar = ({ darkMode }) => {
   );
 };
 
-export default AgentViewSidebar;
+export default AgentViewOldSidebar;

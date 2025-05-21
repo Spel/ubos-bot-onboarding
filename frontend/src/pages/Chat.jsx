@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { getFromStorage, STORAGE_KEYS } from "../utils/localStorage";
 import DOMPurify from 'dompurify';
+import Header from "../components/Header";
+import Sidebar from "../components/Sidebar";
 
 export default function Chat() {
   const { botId } = useParams();
@@ -327,66 +329,72 @@ console.log(greet("User"));`
 
   return (
     <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-neutral-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
-      <div className="flex-1 max-w-4xl mx-auto w-full p-4">
-        <div className={`rounded-lg shadow-lg ${darkMode ? 'bg-neutral-800' : 'bg-white'} overflow-hidden flex flex-col h-[80vh]`}>
-          {/* Messages area */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.map(message => (
-              <div 
-                key={message.id}
-                className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                  message.sender === 'user'
-                    ? (darkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white')
-                    : (darkMode ? 'bg-neutral-700 text-white' : 'bg-gray-100 text-gray-900')
-                }`}>
-                  {renderMessage(message.content)}
-                  <div className={`text-xs mt-1 ${message.sender === 'user' ? 'text-blue-200' : (darkMode ? 'text-gray-400' : 'text-gray-500')}`}>
-                    {new Date(message.timestamp).toLocaleTimeString()}
+      <Header darkMode={darkMode} />
+      <div className="flex flex-1 h-[calc(100vh-4rem)] mt-[4rem]"> {/* Fixed height calculation and margin-top */}
+        <Sidebar />
+        <main className="flex-1 flex flex-col relative" style={{ marginLeft: '16rem', height: 'calc(-61px + 100vh)', marginTop: '61px'}}> {/* Added relative positioning */}
+          <div className={`flex-1 flex flex-col rounded-lg shadow-lg ${darkMode ? 'bg-neutral-800' : 'bg-white'}`}>
+            {/* Messages area with flex-grow and overflow */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0"> {/* min-h-0 ensures proper scrolling */}
+              {messages.map(message => (
+                <div 
+                  key={message.id}
+                  className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                    message.sender === 'user'
+                      ? (darkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white')
+                      : (darkMode ? 'bg-neutral-700 text-white' : 'bg-gray-100 text-gray-900')
+                  }`}>
+                    {renderMessage(message.content)}
+                    <div className={`text-xs mt-1 ${message.sender === 'user' ? 'text-blue-200' : (darkMode ? 'text-gray-400' : 'text-gray-500')}`}>
+                      {new Date(message.timestamp).toLocaleTimeString()}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-            {isTyping && (
-              <div className="flex justify-start">
-                <div className={`rounded-lg px-4 py-2 ${darkMode ? 'bg-neutral-700' : 'bg-gray-100'}`}>
-                  <div className="flex space-x-2">
-                    <div className={`w-2 h-2 rounded-full ${darkMode ? 'bg-gray-400' : 'bg-gray-600'} animate-bounce`} style={{ animationDelay: '0ms' }}></div>
-                    <div className={`w-2 h-2 rounded-full ${darkMode ? 'bg-gray-400' : 'bg-gray-600'} animate-bounce`} style={{ animationDelay: '150ms' }}></div>
-                    <div className={`w-2 h-2 rounded-full ${darkMode ? 'bg-gray-400' : 'bg-gray-600'} animate-bounce`} style={{ animationDelay: '300ms' }}></div>
+              ))}
+              {isTyping && (
+                <div className="flex justify-start">
+                  <div className={`rounded-lg px-4 py-2 ${darkMode ? 'bg-neutral-700' : 'bg-gray-100'}`}>
+                    <div className="flex space-x-2">
+                      <div className={`w-2 h-2 rounded-full ${darkMode ? 'bg-gray-400' : 'bg-gray-600'} animate-bounce`} style={{ animationDelay: '0ms' }}></div>
+                      <div className={`w-2 h-2 rounded-full ${darkMode ? 'bg-gray-400' : 'bg-gray-600'} animate-bounce`} style={{ animationDelay: '150ms' }}></div>
+                      <div className={`w-2 h-2 rounded-full ${darkMode ? 'bg-gray-400' : 'bg-gray-600'} animate-bounce`} style={{ animationDelay: '300ms' }}></div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
 
-          {/* Input area */}
-          <div className={`p-4 border-t ${darkMode ? 'border-neutral-700' : 'border-gray-200'}`}>
-            <form onSubmit={handleSendMessage} className="flex gap-2">
-              <input
-                type="text"
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                placeholder="Type a message or use /help to see commands..."
-                className={`flex-1 px-4 py-2 rounded-lg border ${
-                  darkMode 
-                    ? 'bg-neutral-700 border-neutral-600 text-white placeholder-gray-400' 
-                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                } focus:outline-none focus:ring-2 focus:ring-blue-500`}
-              />
-              <button
-                type="submit"
-                disabled={!inputMessage.trim()}
-                className={`px-4 py-2 rounded-lg ${
-                  darkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'
-                } text-white transition-colors disabled:opacity-50`}
-              >
-                Send
-              </button>
-            </form>
+            {/* Input area - fixed at bottom */}
+            <div className={`border-t ${darkMode ? 'border-neutral-700' : 'border-gray-200'}`}>
+              <form onSubmit={handleSendMessage} className="p-4">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                    placeholder="Type a message or use /help to see commands..."
+                    className={`flex-1 px-4 py-2 rounded-lg border ${
+                      darkMode 
+                        ? 'bg-neutral-700 border-neutral-600 text-white placeholder-gray-400' 
+                        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                    } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  />
+                  <button
+                    type="submit"
+                    disabled={!inputMessage.trim()}
+                    className={`px-4 py-2 rounded-lg ${
+                      darkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'
+                    } text-white transition-colors disabled:opacity-50`}
+                  >
+                    Send
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );
