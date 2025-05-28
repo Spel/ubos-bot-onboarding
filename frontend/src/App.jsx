@@ -19,6 +19,7 @@ import AgentViewImproved from './pages/AgentViewImproved';
 import AgentViewABTest from './pages/AgentViewABTest';
 import CompanyManagement from './pages/CompanyManagement';
 import ProductLanding from './pages/ProductLanding';
+import Marketplace from './pages/Marketplace';
 import { getFromStorage, STORAGE_KEYS } from './utils/localStorage';
 
 function App() {
@@ -86,6 +87,7 @@ function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/" element={isLoggedIn ? <Home /> : <ProductLanding />} />
         <Route path="/login" element={isLoggedIn ? <Navigate to="/home" /> : <Login />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/home" element={isLoggedIn ? <Home /> : <Navigate to="/login" />} />
@@ -99,16 +101,12 @@ function App() {
         <Route path="/subscription-plans" element={isLoggedIn ? <SubscriptionPlans /> : <Navigate to="/login" />} />
         <Route path="/cost-comparison" element={isLoggedIn ? <CostComparison /> : <Navigate to="/login" />} />
         <Route path="/admin" element={isLoggedIn ? <Admin /> : <Navigate to="/login" />} />
+        <Route path="/marketplace" element={isLoggedIn ? <Marketplace /> : <Navigate to="/login" />} />
         <Route path="/templates" element={isLoggedIn ? <Templates /> : <Navigate to="/login" />} />
         <Route path="/create-agent/:templateId?" element={isLoggedIn ? <CreateAgent /> : <Navigate to="/login" />} />
         <Route path="/manage-agent/:botId" element={isLoggedIn ? <EditAgent /> : <Navigate to="/login" />} />
-        {/* Main agent route - uses improved version by default with A/B testing capability */}
         <Route path="/agent/:botId" element={isLoggedIn ? <AgentViewImproved /> : <Navigate to="/login" />} />
-        
-        {/* A/B Testing route */}
         <Route path="/agent-test/:botId" element={isLoggedIn ? <AgentViewABTest /> : <Navigate to="/login" />} />
-        
-        {/* Legacy routes for direct access to specific versions */}
         <Route path="/agent-original/:botId" element={isLoggedIn ? <AgentView /> : <Navigate to="/login" />} />
         <Route path="/agent-improved/:botId" element={isLoggedIn ? <AgentViewImproved /> : <Navigate to="/login" />} />
         <Route path="/company-management" element={isLoggedIn ? <CompanyManagement /> : <Navigate to="/login" />} />

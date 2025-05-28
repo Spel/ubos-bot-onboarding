@@ -108,7 +108,7 @@ export const getBots = () => {
       const botNameSlug = bot.name.toLowerCase().replace(/\s+/g, '-');
       return {
         ...bot,
-        domain: bot.domain || `${bot.name.toLowerCase().replace(/\s+/g, '')}.ubos.bot`,
+        domain: bot.domain || bot.name.toLowerCase().replace(/\s+/g, ''),
         url: bot.url || `/bot/${botNameSlug}`
       };
     }
@@ -138,7 +138,7 @@ export const addBot = (bot) => {
   
   // Generate URL and domain from bot name if not provided
   const botNameSlug = bot.name.toLowerCase().replace(/\s+/g, "-");
-  const domain = bot.domain || `${botNameSlug}.ubos.bot`;
+  const domain = bot.domain || botNameSlug;
   const url = bot.url || `/bot/${botNameSlug}`;
   
   // Set default average TPU consumption based on bot type
@@ -169,22 +169,110 @@ export const addBot = (bot) => {
 
 // Update an existing bot
 export const updateBot = (id, updatedData) => {
+  console.log(`Updating bot with ID: ${id}`, updatedData);
+  
   const bots = getBots();
+  if (!bots || !bots.length) {
+    console.error('No bots found in storage when trying to update');
+    return null;
+  }
+  
+  // Find the bot to update
+  const botToUpdate = bots.find(bot => bot.id === id);
+  if (!botToUpdate) {
+    console.error(`Bot with ID ${id} not found`);
+    return null;
+  }
+  
+  // Ensure knowledgeBase exists
+  if (updatedData.knowledgeBase && !botToUpdate.knowledgeBase) {
+    console.log(`Initializing knowledgeBase for bot ${id}`);
+  }
+  
+  // Create updated bot
+  const updatedBot = { ...botToUpdate, ...updatedData };
+  console.log('Updated bot data:', updatedBot);
+  
+  // Update the bots array
   const updatedBots = bots.map(bot => 
-    bot.id === id ? { ...bot, ...updatedData } : bot
+    bot.id === id ? updatedBot : bot
   );
   
+  // Save to localStorage
+  console.log('Saving updated bots to localStorage');
   saveToStorage(STORAGE_KEYS.BOTS, updatedBots);
-  return updatedBots.find(bot => bot.id === id);
+  
+  // Verify the save was successful
+  const savedBots = getFromStorage(STORAGE_KEYS.BOTS, []);
+  const savedBot = savedBots.find(bot => bot.id === id);
+  
+  if (savedBot && savedBot.knowledgeBase) {
+    console.log('Bot successfully saved with knowledge base:', savedBot.knowledgeBase);
+  } else {
+    console.warn('Bot may not have been saved correctly');
+  }
+  
+  return savedBot;
 };
 
 // Delete a bot
 export const deleteBot = (id) => {
   const bots = getBots();
   const updatedBots = bots.filter(bot => bot.id !== id);
-  
   saveToStorage(STORAGE_KEYS.BOTS, updatedBots);
-  return updatedBots;
+  return true;
+};
+
+// Get all knowledge bases from existing bots
+export const getAllKnowledgeBases = () => {
+  const bots = getBots();
+  return bots
+    .filter(bot => bot.knowledgeBase) // Only include bots that have a knowledge base
+    .map(bot => ({
+      botId: bot.id,
+      botName: bot.name,
+      knowledgeBase: bot.knowledgeBase,
+      lastUpdated: bot.knowledgeBase.lastUpdated || 'Unknown',
+      itemCount: [
+        bot.knowledgeBase.documents?.length || 0,
+        bot.knowledgeBase.webUrls?.length || 0,
+        bot.knowledgeBase.textEntries?.length || 0,
+        bot.knowledgeBase.qaEntries?.length || 0,
+        bot.knowledgeBase.images?.length || 0
+      ].reduce((a, b) => a + b, 0) // Total count of all knowledge items
+    }));
+};
+
+// Copy a knowledge base from one bot to another
+export const copyKnowledgeBase = (sourceBotId, targetBotId) => {
+  // Get source and target bots
+  const sourceBotData = getBot(sourceBotId);
+  const targetBotData = getBot(targetBotId);
+  
+  if (!sourceBotData || !targetBotData) {
+    console.error('Source or target bot not found');
+    return false;
+  }
+  
+  if (!sourceBotData.knowledgeBase) {
+    console.error('Source bot does not have a knowledge base');
+    return false;
+  }
+  
+  // Create a deep copy of the knowledge base
+  const knowledgeBaseCopy = JSON.parse(JSON.stringify(sourceBotData.knowledgeBase));
+  
+  // Update the lastUpdated timestamp
+  knowledgeBaseCopy.lastUpdated = new Date().toISOString();
+  
+  // Update the target bot with the copied knowledge base
+  const updatedTargetBot = {
+    ...targetBotData,
+    knowledgeBase: knowledgeBaseCopy
+  };
+  
+  // Save the updated target bot
+  return updateBot(targetBotId, updatedTargetBot);
 };
 
 // Get bot count

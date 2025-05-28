@@ -13,6 +13,8 @@ import { AgentViewSidebar } from "../components/ui/AgentViewSidebar";
 import { PromptSection } from "../components/AgentView/PromptSection";
 import { KnowledgeSection } from "../components/AgentView/KnowledgeSection";
 import { DefaultSection } from "../components/AgentView/DefaultSection";
+import { GeneralSettingsSection } from "../components/AgentView/GeneralSettingsSection";
+import { AdvancedSettingsSection } from "../components/AgentView/AdvancedSettingsSection";
 
 export default function AgentView() {
   const { botId } = useParams();
@@ -24,8 +26,8 @@ export default function AgentView() {
   const [saved, setSaved] = useState(true);
   const [activeTab, setActiveTab] = useState('add-existing');
 
-  // Get initial active section from URL or default to 'prompt'
-  const initialSection = new URLSearchParams(location.search).get('section') || 'prompt';
+  // Get initial active section from URL or default to 'general'
+  const initialSection = new URLSearchParams(location.search).get('section') || 'general';
   const [activeSection, setActiveSection] = useState(initialSection);
 
   // Update URL when active section changes
@@ -110,10 +112,14 @@ export default function AgentView() {
 
   const renderActiveSection = () => {
     switch (activeSection) {
+      case 'general':
+        return <GeneralSettingsSection darkMode={darkMode} bot={bot} />;
       case 'prompt':
         return <PromptSection darkMode={darkMode} bot={bot} />;
       case 'knowledge':
-        return <KnowledgeSection darkMode={darkMode} knowledgeItems={[]} />;
+        return <KnowledgeSection darkMode={darkMode} bot={bot} botId={botId} />;
+      case 'advanced':
+        return <AdvancedSettingsSection darkMode={darkMode} bot={bot} />;
       default:
         return (
           <DefaultSection 
@@ -149,7 +155,7 @@ export default function AgentView() {
           </div>
         </div>
 
-        {/* Right sidebar */}
+        {/* Right sidebar
         <div className={`w-72 border-l overflow-y-auto ${darkMode ? 'border-neutral-800 bg-neutral-900' : 'border-gray-200 bg-white'} shadow-md`}>
           <div className={`p-4 border-b ${darkMode ? 'border-neutral-800' : 'border-gray-200'}`}>
             <div className="flex items-center justify-between mb-4">
@@ -281,7 +287,7 @@ export default function AgentView() {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
       
       {/* Compact A/B Testing Button */}

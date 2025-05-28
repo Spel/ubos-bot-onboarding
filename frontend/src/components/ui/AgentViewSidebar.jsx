@@ -6,11 +6,18 @@ import {
   ArrowUpRight,
   Info,
   Code,
-  HelpCircle
+  HelpCircle,
+  Sliders
 } from "lucide-react";
 
 export function AgentViewSidebar({ darkMode, activeSection, setActiveSection }) {
   const mainItems = [
+    {
+      id: 'general',
+      icon: <Sliders className={`h-3.5 w-3.5 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`} />,
+      label: 'General Settings',
+      description: 'Configure basic agent settings'
+    },
     {
       id: 'prompt',
       icon: 'P',

@@ -25,7 +25,8 @@ export const STORAGE_KEYS = {
   USER_PREFERENCES: 'ubos_user_preferences',
   NOTIFICATIONS: 'ubos_notifications',
   RECENT_ACTIVITIES: 'ubos_recent_activities',
-  USAGE_STATISTICS: 'ubos_usage_statistics'
+  USAGE_STATISTICS: 'ubos_usage_statistics',
+  USER_MODE: 'ubos_user_mode' // 'user' or 'creator'
 };
 
 /**
