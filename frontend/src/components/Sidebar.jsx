@@ -39,7 +39,7 @@ export default function Sidebar({ darkMode }) {
   };
 
   return (
-    <div className={`fixed top-0 left-0 h-full w-64 ${darkMode ? 'bg-neutral-900 border-neutral-800' : 'bg-white border-gray-200'} border-r`}>
+    <div className={`hidden lg:flex flex-col w-64 h-screen border-e fixed left-0 top-0 bottom-0 z-50 bg-white border-gray-200 ${darkMode ? 'bg-neutral-900 border-neutral-800' : 'bg-white border-gray-200'} border-r`}>
       <div className="flex flex-col h-full overflow-y-auto">
         {/* Logo */}
         <div className="px-6 pt-6 pb-4 flex items-center">
@@ -164,7 +164,24 @@ export default function Sidebar({ darkMode }) {
                     <h3 className={`text-xs font-semibold uppercase ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Agent Management</h3>
                   </div>
                 </li>
-
+                <li>
+                  <Link 
+                    to="/dashboard" 
+                    className={`flex items-center gap-x-3.5 py-2 px-2.5 text-sm rounded-md ${
+                      currentPath === '/dashboard' 
+                        ? (darkMode ? 'bg-neutral-700 text-white' : 'bg-gray-100 text-blue-600')
+                        : (darkMode ? 'text-gray-400 hover:bg-neutral-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600')
+                    }`}
+                  >
+                    <svg className="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect width="7" height="9" x="3" y="3" rx="1"></rect>
+                      <rect width="7" height="5" x="14" y="3" rx="1"></rect>
+                      <rect width="7" height="9" x="14" y="12" rx="1"></rect>
+                      <rect width="7" height="5" x="3" y="16" rx="1"></rect>
+                    </svg>
+                    Dashboard
+                  </Link>
+                </li>
                 <li>
                   <Link 
                     to="/my-bots" 
@@ -184,22 +201,7 @@ export default function Sidebar({ darkMode }) {
                   </Link>
                 </li>
 
-                <li>
-                  <Link 
-                    to="/templates" 
-                    className={`flex items-center gap-x-3.5 py-2 px-2.5 text-sm rounded-md ${
-                      currentPath === '/templates' 
-                        ? (darkMode ? 'bg-neutral-700 text-white' : 'bg-gray-100 text-blue-600')
-                        : (darkMode ? 'text-gray-400 hover:bg-neutral-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600')
-                    }`}
-                  >
-                    <svg className="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                    Templates
-                  </Link>
-                </li>
-
+              
                 <li>
                   <Link 
                     to="/company-management" 
@@ -216,23 +218,40 @@ export default function Sidebar({ darkMode }) {
                     My Company
                   </Link>
                 </li>
-
                 <li>
                   <Link 
-                    to="/dashboard" 
+                    to="/templates" 
                     className={`flex items-center gap-x-3.5 py-2 px-2.5 text-sm rounded-md ${
-                      currentPath === '/dashboard' 
+                      currentPath === '/templates' 
                         ? (darkMode ? 'bg-neutral-700 text-white' : 'bg-gray-100 text-blue-600')
                         : (darkMode ? 'text-gray-400 hover:bg-neutral-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600')
                     }`}
                   >
                     <svg className="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect width="7" height="9" x="3" y="3" rx="1"></rect>
-                      <rect width="7" height="5" x="14" y="3" rx="1"></rect>
-                      <rect width="7" height="9" x="14" y="12" rx="1"></rect>
-                      <rect width="7" height="5" x="3" y="16" rx="1"></rect>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
-                    Dashboard
+                    Templates
+                  </Link>
+                </li>
+
+       
+
+                <li className="pt-5 pb-2">
+                  <div className="px-2">
+                    <h3 className={`text-xs font-semibold uppercase ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Administration</h3>
+                  </div>
+                </li>
+                <li>
+                  <Link 
+                    to="/admin" 
+                    className={`flex items-center gap-x-3.5 py-2 px-2.5 text-sm rounded-md ${
+                      currentPath === '/admin' 
+                        ? (darkMode ? 'bg-neutral-700 text-white' : 'bg-gray-100 text-blue-600')
+                        : (darkMode ? 'text-gray-400 hover:bg-neutral-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600')
+                    }`}
+                  >
+                   <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    Admin
                   </Link>
                 </li>
               </>
@@ -242,19 +261,44 @@ export default function Sidebar({ darkMode }) {
         
         {/* User section at bottom */}
         <div className="mt-auto p-3">
+
+
           {/* Credits indicator */}
-          <div className={`p-3 rounded-lg ${darkMode ? 'bg-neutral-800' : 'bg-gray-100'} mb-3`}>
-            <div className="flex items-center justify-between mb-1">
-              <span className={`text-xs font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Agent Hours Used</span>
-              <span className={`text-xs font-medium ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
-                {formatHours(usedTpuHours)} / {formatHours(tpuHours)}
+          <div className={`p-3 rounded-lg ${darkMode ? 'bg-neutral-800' : 'bg-gray-50'} mb-3`}>
+            <div className="mb-1">
+              <span className={`text-xs font-medium ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>
+                FREE PLAN
               </span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+            
+            <div className="flex items-center gap-1 mb-1">
+              <svg className="size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2v20"/>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+              </svg>
+              <span className={`text-xs font-medium ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>Credits</span>
+              <span className={`text-xs font-medium ml-auto ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>
+                {formatCredits(remainingTpuSeconds)}/{formatCredits(tpuSeconds)}
+              </span>
+            </div>
+
+            <div className="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-700 mb-1">
               <div 
-                className="bg-blue-600 h-2 rounded-full" 
+                className="bg-green-500 h-1.5 rounded-full" 
                 style={{ width: `${Math.min(100, (usedTpuSeconds / tpuSeconds) * 100)}%` }}
               ></div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className={`text-[10px] ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                Resets monthly
+              </span>
+              <Link 
+                to="/subscription-plans"
+                className={`text-[10px] ${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}
+              >
+                Manage plan →
+              </Link>
             </div>
           </div>
           
