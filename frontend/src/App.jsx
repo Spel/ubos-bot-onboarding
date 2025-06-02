@@ -7,6 +7,7 @@ import Onboarding from './pages/Onboarding';
 import Login from './pages/Login';
 import Chat from './pages/Chat';
 import GlobalChat from './pages/GlobalChat';
+import MicroFrontendChat from './pages/MicroFrontendChat';
 import BotLanding from './pages/BotLanding';
 import SubscriptionPlans from './pages/SubscriptionPlans';
 import CostComparison from './pages/CostComparison';
@@ -96,6 +97,8 @@ function App() {
         <Route path="/my-bots" element={isLoggedIn ? <MyBots /> : <Navigate to="/login" />} />
         <Route path="/chat" element={isLoggedIn ? <Chat /> : <Navigate to="/login" />} />
         <Route path="/chat/:botId" element={isLoggedIn ? <Chat /> : <Navigate to="/login" />} />
+        <Route path="/micro-chat" element={isLoggedIn ? <MicroFrontendChat /> : <Navigate to="/login" />} />
+        <Route path="/micro-chat/:botId" element={isLoggedIn ? <MicroFrontendChat /> : <Navigate to="/login" />} />
         <Route path="/global-chat" element={isLoggedIn ? <GlobalChat /> : <Navigate to="/login" />} />
         <Route path="/bot/:botId" element={isLoggedIn ? <BotLanding /> : <Navigate to="/login" />} />
         <Route path="/subscription-plans" element={isLoggedIn ? <SubscriptionPlans /> : <Navigate to="/login" />} />
