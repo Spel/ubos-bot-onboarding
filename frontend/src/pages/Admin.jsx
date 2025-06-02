@@ -2,10 +2,119 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
-import { getFromStorage, STORAGE_KEYS } from "../utils/localStorage";
+import { getFromStorage, saveToStorage, STORAGE_KEYS } from "../utils/localStorage";
+import OpenWebUIUserTable from "../components/OpenWebUIUserTable";
+import OpenWebUIUserModal from "../components/OpenWebUIUserModal";
+import OpenWebUIUserEditModal from "../components/OpenWebUIUserEditModal";
+import OpenWebUILoginModal from "../components/OpenWebUILoginModal";
+import { testConnection, isAuthenticated, clearAuthToken, getAuthToken } from "../utils/openWebUIApi";
 
 export default function Admin() {
   const [darkMode, setDarkMode] = useState(getFromStorage(STORAGE_KEYS.DARK_MODE, false));
+  
+  // OpenWebUI API configuration state
+  const [openWebUIApiConfig, setOpenWebUIApiConfig] = useState({
+    baseUrl: getFromStorage(STORAGE_KEYS.OPEN_WEBUI_BASE_URL, "http://localhost:8081"),
+    apiPath: getFromStorage(STORAGE_KEYS.OPEN_WEBUI_API_PATH, "/api/v1"),
+  });
+  const [isTestingConnection, setIsTestingConnection] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState(null);
+  
+  // OpenWebUI authentication state
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authError, setAuthError] = useState(null);
+  
+  // OpenWebUI modals state
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  
+  // Check authentication status on mount and when API config changes
+  useEffect(() => {
+    checkAuthStatus();
+  }, [openWebUIApiConfig]);
+  
+  // Check if user is authenticated with OpenWebUI
+  const checkAuthStatus = async () => {
+    try {
+      const token = getAuthToken();
+      if (!token) {
+        setIsAuthenticated(false);
+        return;
+      }
+      
+      const authStatus = await isAuthenticated();
+      setIsAuthenticated(authStatus);
+      setAuthError(null);
+    } catch (err) {
+      console.error("Auth check failed:", err);
+      setIsAuthenticated(false);
+      setAuthError(err.message);
+    }
+  };
+  
+  // Handle API config changes
+  const handleApiConfigChange = (e) => {
+    const { name, value } = e.target;
+    setOpenWebUIApiConfig(prev => {
+      const updated = { ...prev, [name]: value };
+      // Save to localStorage
+      if (name === "baseUrl") {
+        saveToStorage(STORAGE_KEYS.OPEN_WEBUI_BASE_URL, value);
+      } else if (name === "apiPath") {
+        saveToStorage(STORAGE_KEYS.OPEN_WEBUI_API_PATH, value);
+      }
+      return updated;
+    });
+  };
+  
+  // Test connection to OpenWebUI API
+  const handleTestConnection = async () => {
+    setIsTestingConnection(true);
+    setConnectionStatus(null);
+    
+    try {
+      const result = await testConnection(openWebUIApiConfig.baseUrl, openWebUIApiConfig.apiPath);
+      setConnectionStatus({ success: true, message: "Connection successful!" });
+    } catch (err) {
+      console.error("Connection test failed:", err);
+      setConnectionStatus({ success: false, message: err.message || "Connection failed" });
+    } finally {
+      setIsTestingConnection(false);
+    }
+  };
+  
+  // Handle successful login
+  const handleLoginSuccess = () => {
+    setIsAuthenticated(true);
+    setAuthError(null);
+    setIsLoginModalOpen(false);
+  };
+  
+  // Handle logout
+  const handleLogout = () => {
+    clearAuthToken();
+    setIsAuthenticated(false);
+  };
+  
+  // Handle user edit
+  const handleEditUser = (user) => {
+    setSelectedUser(user);
+    setIsEditModalOpen(true);
+  };
+  
+  // Handle user creation success
+  const handleUserCreated = () => {
+    // Refresh user table (handled by child component)
+  };
+  
+  // Handle user edit success
+  const handleUserEdited = () => {
+    setIsEditModalOpen(false);
+    setSelectedUser(null);
+    // Refresh user table (handled by child component)
+  };
   
   // Mock data for business metrics
   const [metrics, setMetrics] = useState({
@@ -911,6 +1020,145 @@ export default function Admin() {
               )}
             </div>
           </div>
+          
+          {/* OpenWebUI User Management */}
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-3">
+              <h2 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Open WebUI User Management</h2>
+              <div className="flex items-center space-x-2">
+                {isAuthenticated ? (
+                  <>
+                    <button
+                      onClick={() => setIsUserModalOpen(true)}
+                      className={`py-2 px-4 rounded-lg ${darkMode ? 'bg-green-600 hover:bg-green-700' : 'bg-green-500 hover:bg-green-600'} text-white transition-colors`}
+                    >
+                      Create User
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className={`py-2 px-4 rounded-lg ${darkMode ? 'bg-red-600 hover:bg-red-700' : 'bg-red-500 hover:bg-red-600'} text-white transition-colors`}
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => setIsLoginModalOpen(true)}
+                    className={`py-2 px-4 rounded-lg ${darkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} text-white transition-colors`}
+                  >
+                    Login to Open WebUI
+                  </button>
+                )}
+              </div>
+            </div>
+            
+            {/* API Configuration */}
+            <div className={`${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'} border rounded-xl shadow-sm p-6 mb-4`}>
+              <h3 className={`text-md font-medium mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>API Configuration</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                    Base URL
+                  </label>
+                  <input
+                    type="text"
+                    name="baseUrl"
+                    value={openWebUIApiConfig.baseUrl}
+                    onChange={handleApiConfigChange}
+                    className={`w-full py-2 px-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${darkMode ? 'bg-neutral-700 text-white' : 'bg-white text-gray-900'} border ${darkMode ? 'border-neutral-600' : 'border-gray-300'}`}
+                    placeholder="http://localhost:8081"
+                  />
+                </div>
+                <div>
+                  <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                    API Path
+                  </label>
+                  <input
+                    type="text"
+                    name="apiPath"
+                    value={openWebUIApiConfig.apiPath}
+                    onChange={handleApiConfigChange}
+                    className={`w-full py-2 px-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${darkMode ? 'bg-neutral-700 text-white' : 'bg-white text-gray-900'} border ${darkMode ? 'border-neutral-600' : 'border-gray-300'}`}
+                    placeholder="/api/v1"
+                  />
+                </div>
+                <div className="flex items-end">
+                  <button
+                    onClick={handleTestConnection}
+                    disabled={isTestingConnection}
+                    className={`py-2 px-4 rounded-lg ${darkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} text-white transition-colors ${isTestingConnection ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {isTestingConnection ? 'Testing...' : 'Test Connection'}
+                  </button>
+                </div>
+              </div>
+              
+              {/* Connection status message */}
+              {connectionStatus && (
+                <div className={`mt-4 p-3 rounded-lg ${connectionStatus.success ? (darkMode ? 'bg-green-900 text-green-200' : 'bg-green-100 text-green-800') : (darkMode ? 'bg-red-900 text-red-200' : 'bg-red-100 text-red-800')}`}>
+                  {connectionStatus.message}
+                </div>
+              )}
+              
+              {/* Auth error message */}
+              {authError && (
+                <div className={`mt-4 p-3 rounded-lg ${darkMode ? 'bg-red-900 text-red-200' : 'bg-red-100 text-red-800'}`}>
+                  Authentication error: {authError}
+                </div>
+              )}
+            </div>
+            
+            {/* User table */}
+            {isAuthenticated ? (
+              <OpenWebUIUserTable 
+                darkMode={darkMode}
+                onEditUser={handleEditUser}
+                onUserDeleted={() => {}}
+                onError={(error) => setAuthError(error)}
+                onLoginRequired={() => setIsLoginModalOpen(true)}
+              />
+            ) : (
+              <div className={`${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'} border rounded-xl shadow-sm p-6 text-center`}>
+                <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-4`}>
+                  Please login to Open WebUI to manage users
+                </p>
+                <button
+                  onClick={() => setIsLoginModalOpen(true)}
+                  className={`py-2 px-4 rounded-lg ${darkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} text-white transition-colors`}
+                >
+                  Login
+                </button>
+              </div>
+            )}
+          </div>
+          
+          {/* OpenWebUI Login Modal */}
+          <OpenWebUILoginModal
+            isOpen={isLoginModalOpen}
+            onClose={() => setIsLoginModalOpen(false)}
+            darkMode={darkMode}
+            onSuccess={handleLoginSuccess}
+          />
+          
+          {/* OpenWebUI User Create Modal */}
+          <OpenWebUIUserModal
+            isOpen={isUserModalOpen}
+            onClose={() => setIsUserModalOpen(false)}
+            darkMode={darkMode}
+            onSuccess={handleUserCreated}
+          />
+          
+          {/* OpenWebUI User Edit Modal */}
+          <OpenWebUIUserEditModal
+            isOpen={isEditModalOpen}
+            onClose={() => {
+              setIsEditModalOpen(false);
+              setSelectedUser(null);
+            }}
+            darkMode={darkMode}
+            user={selectedUser}
+            onSuccess={handleUserEdited}
+          />
         </main>
       </div>
     </div>

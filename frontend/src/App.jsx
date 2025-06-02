@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
 import MyBots from './pages/MyBots';
@@ -21,7 +21,8 @@ import AgentViewABTest from './pages/AgentViewABTest';
 import CompanyManagement from './pages/CompanyManagement';
 import ProductLanding from './pages/ProductLanding';
 import Marketplace from './pages/Marketplace';
-import { getFromStorage, STORAGE_KEYS } from './utils/localStorage';
+import { getFromStorage, saveToStorage, STORAGE_KEYS } from './utils/localStorage';
+import { AppLayout } from './components/layout/app-layout';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -85,34 +86,46 @@ function App() {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
   
+  // Protected route component that checks authentication
+  const ProtectedRoute = () => {
+    return isLoggedIn ? <Outlet /> : <Navigate to="/login" />;
+  };
+
   return (
     <Router>
       <Routes>
-        <Route path="/" element={isLoggedIn ? <Home /> : <ProductLanding />} />
+        {/* Public routes */}
+        <Route path="/" element={isLoggedIn ? <Navigate to="/home" /> : <ProductLanding />} />
         <Route path="/login" element={isLoggedIn ? <Navigate to="/home" /> : <Login />} />
         <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="/home" element={isLoggedIn ? <Home /> : <Navigate to="/login" />} />
         <Route path="/product" element={<ProductLanding />} />
-        <Route path="/dashboard" element={isLoggedIn ? <Dashboard /> : <Navigate to="/login" />} />
-        <Route path="/my-bots" element={isLoggedIn ? <MyBots /> : <Navigate to="/login" />} />
-        <Route path="/chat" element={isLoggedIn ? <Chat /> : <Navigate to="/login" />} />
-        <Route path="/chat/:botId" element={isLoggedIn ? <Chat /> : <Navigate to="/login" />} />
-        <Route path="/micro-chat" element={isLoggedIn ? <MicroFrontendChat /> : <Navigate to="/login" />} />
-        <Route path="/micro-chat/:botId" element={isLoggedIn ? <MicroFrontendChat /> : <Navigate to="/login" />} />
-        <Route path="/global-chat" element={isLoggedIn ? <GlobalChat /> : <Navigate to="/login" />} />
-        <Route path="/bot/:botId" element={isLoggedIn ? <BotLanding /> : <Navigate to="/login" />} />
-        <Route path="/subscription-plans" element={isLoggedIn ? <SubscriptionPlans /> : <Navigate to="/login" />} />
-        <Route path="/cost-comparison" element={isLoggedIn ? <CostComparison /> : <Navigate to="/login" />} />
-        <Route path="/admin" element={isLoggedIn ? <Admin /> : <Navigate to="/login" />} />
-        <Route path="/marketplace" element={isLoggedIn ? <Marketplace /> : <Navigate to="/login" />} />
-        <Route path="/templates" element={isLoggedIn ? <Templates /> : <Navigate to="/login" />} />
-        <Route path="/create-agent/:templateId?" element={isLoggedIn ? <CreateAgent /> : <Navigate to="/login" />} />
-        <Route path="/manage-agent/:botId" element={isLoggedIn ? <EditAgent /> : <Navigate to="/login" />} />
-        <Route path="/agent/:botId" element={isLoggedIn ? <AgentViewImproved /> : <Navigate to="/login" />} />
-        <Route path="/agent-test/:botId" element={isLoggedIn ? <AgentViewABTest /> : <Navigate to="/login" />} />
-        <Route path="/agent-original/:botId" element={isLoggedIn ? <AgentView /> : <Navigate to="/login" />} />
-        <Route path="/agent-improved/:botId" element={isLoggedIn ? <AgentViewImproved /> : <Navigate to="/login" />} />
-        <Route path="/company-management" element={isLoggedIn ? <CompanyManagement /> : <Navigate to="/login" />} />
+        
+        {/* Protected routes with layout */}
+        <Route element={<AppLayout />}>
+          <Route path="/home" element={<Home />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/my-bots" element={<MyBots />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/chat/:botId" element={<Chat />} />
+          <Route path="/micro-chat" element={<MicroFrontendChat />} />
+          <Route path="/micro-chat/:botId" element={<MicroFrontendChat />} />
+          <Route path="/global-chat" element={<GlobalChat />} />
+          <Route path="/bot/:botId" element={<BotLanding />} />
+          <Route path="/subscription-plans" element={<SubscriptionPlans />} />
+          <Route path="/cost-comparison" element={<CostComparison />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/marketplace" element={<Marketplace />} />
+          <Route path="/templates" element={<Templates />} />
+          <Route path="/create-agent/:templateId?" element={<CreateAgent />} />
+          <Route path="/manage-agent/:botId" element={<EditAgent />} />
+          <Route path="/agent/:botId" element={<AgentViewImproved />} />
+          <Route path="/agent-test/:botId" element={<AgentViewABTest />} />
+          <Route path="/agent-original/:botId" element={<AgentView />} />
+          <Route path="/agent-improved/:botId" element={<AgentViewImproved />} />
+          <Route path="/company-management" element={<CompanyManagement />} />
+        </Route>
+        
+        {/* Fallback route */}
         <Route path="*" element={<Navigate to={isLoggedIn ? "/home" : "/login"} />} />
       </Routes>
     </Router>

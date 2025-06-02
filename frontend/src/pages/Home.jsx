@@ -1,9 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import Header from "../components/Header";
-import Sidebar from "../components/Sidebar";
 import { getFromStorage, saveToStorage, STORAGE_KEYS } from "../utils/localStorage";
 import { getBots, getBotsByType } from "../utils/botsData";
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarTrigger,
+  SidebarInset,
+  SidebarCollapseTrigger
+} from "../components/ui/sidebar";
+import { AppSidebar } from "../components/sidebar/app-sidebar";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -28,11 +35,24 @@ export default function Home() {
     // Save dark mode preference to localStorage
     saveToStorage(STORAGE_KEYS.DARK_MODE, newDarkMode);
     
+    // Apply dark mode to body - this ensures consistency with AppLayout
     if (newDarkMode) {
+      document.body.classList.add('dark');
       document.documentElement.classList.add('dark');
     } else {
+      document.body.classList.remove('dark');
       document.documentElement.classList.remove('dark');
     }
+  };
+  
+  // Handle logout function
+  const handleLogout = () => {
+    // Clear user data from localStorage
+    localStorage.removeItem(STORAGE_KEYS.USER_EMAIL);
+    localStorage.removeItem(STORAGE_KEYS.USER_MODE);
+    
+    // Redirect to login page
+    navigate('/login');
   };
 
   // Extract first name from email for personalized greeting
@@ -259,40 +279,36 @@ export default function Home() {
   };
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-neutral-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
-      {/* Header */}
-      <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-      
-      {/* Sidebar */}
-      <Sidebar darkMode={darkMode} />
-      
-      {/* Main Content - Using the same inline style approach as Dashboard */}
-      <div style={{ paddingLeft: '16rem', paddingTop: '61px' }}>
-        <main className="w-full overflow-y-auto p-4 md:p-6 max-w-6xl mx-auto">
-          {/* Greeting Section */}
-          <div className="text-center mb-6">
-            <h1 className="text-5xl font-bold mb-3">
-              Hello, <span className={`${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>{userName}</span>
-            </h1>
-            <p className={`text-xl ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-              How can I assist you today?
-            </p>
-          </div>
-          
-          {/* Chat Input - Clean Design */}
-          <div className="mt-10 max-w-2xl w-full mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-            <form onSubmit={handleSearchSubmit} className="relative">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search content or ask questions"
-                className={`p-3 sm:p-4 block w-full border rounded-full sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none ${darkMode ? 'bg-neutral-900 border-neutral-700 text-neutral-400 placeholder-neutral-500 focus:ring-neutral-600' : 'border-gray-200 text-gray-800 placeholder-gray-500'}`}
-              />
-              <div className="absolute top-1/2 end-2 -translate-y-1/2 flex">
-                {/* Send Message Button */}
-                <button 
-                  type="submit"
+    <SidebarProvider defaultOpen={true}>
+      <div className="flex h-screen overflow-hidden">
+        <AppSidebar darkMode={darkMode} onToggleDarkMode={toggleDarkMode} onLogout={handleLogout} />
+        <SidebarInset>
+          <main className="flex-1 overflow-y-auto">
+            <div className="p-4 md:p-6 max-w-6xl mx-auto">
+              {/* Greeting Section */}
+              <div className="text-center mb-6">
+                <h1 className="text-5xl font-bold mb-3">
+                  Hello, <span className={`${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>{userName}</span>
+                </h1>
+                <p className={`text-xl ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                  How can I assist you today?
+                </p>
+              </div>
+              
+              {/* Chat Input - Clean Design */}
+              <div className="mt-10 max-w-2xl w-full mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+                <form onSubmit={handleSearchSubmit} className="relative">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search content or ask questions"
+                    className={`p-3 sm:p-4 block w-full border rounded-full sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none ${darkMode ? 'bg-neutral-900 border-neutral-700 text-neutral-400 placeholder-neutral-500 focus:ring-neutral-600' : 'border-gray-200 text-gray-800 placeholder-gray-500'}`}
+                  />
+                  <div className="absolute top-1/2 end-2 -translate-y-1/2 flex">
+                    {/* Send Message Button */}
+                    <button 
+                      type="submit"
                   disabled={!searchQuery.trim()}
                   className={`size-10 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent ${!searchQuery.trim() ? 
                     (darkMode ? 'text-neutral-600 pointer-events-none' : 'text-gray-300 pointer-events-none') : 
@@ -538,9 +554,11 @@ export default function Home() {
                 </p>
               </Link>
             </div>
-          </div>
-        </main>
+          </div> </div>
+          </main>
+         
+        </SidebarInset>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }

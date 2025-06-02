@@ -15,6 +15,10 @@ export const STORAGE_KEYS = {
   BOT_SETTINGS: 'ubos_bot_settings',
   CHAT_HISTORY: 'ubos_chat_history',
   CREDITS: 'ubos_credits',
+  // OpenWebUI integration keys
+  OPEN_WEBUI_BASE_URL: 'open_webui_base_url',
+  OPEN_WEBUI_API_PATH: 'open_webui_api_path',
+  OPEN_WEBUI_AUTH_TOKEN: 'open_webui_auth_token',
   // Additional data keys
   USER_SETTINGS: 'ubos_user_settings',
   USER_PROFILE: 'ubos_user_profile',

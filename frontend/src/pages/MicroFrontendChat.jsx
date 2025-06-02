@@ -1,123 +1,296 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getFromStorage, STORAGE_KEYS } from '../utils/localStorage';
-import Header from '../components/Header';
-import Sidebar from '../components/Sidebar';
+import {
+  SidebarProvider,
+  SidebarInset,
+} from '../components/ui/sidebar';
+import { AppSidebar } from '../components/sidebar/app-sidebar';
+import { cn } from '../utils/cn';
 
 /**
- * MicroFrontendChat component that integrates an external chat component
- * served from another origin as a microfrontend.
+ * MicroFrontendChat component that integrates an external application
+ * served from another origin as a microfrontend within an iframe.
+ * 
+ * @returns {JSX.Element} The MicroFrontendChat component
  */
 export default function MicroFrontendChat() {
   const { botId } = useParams();
-  const [darkMode, setDarkMode] = useState(getFromStorage(STORAGE_KEYS.DARK_MODE, false));
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
+  const navigate = useNavigate();
   const iframeRef = useRef(null);
-
-  // Microfrontend URL
-  const microFrontendUrl = 'http://localhost:5174/';
-
-  // Handle iframe load events
+  
+  // State management
+  const [darkMode, setDarkMode] = useState(getFromStorage(STORAGE_KEYS.DARK_MODE, false));
+  const [iframeState, setIframeState] = useState({
+    isLoading: true,
+    hasError: false,
+    errorMessage: '',
+  });
+  
+  // URL for the microfrontend - could be environment variable in production
+  const microFrontendUrl = 'http://localhost:5050/';
+  
+  // Event handlers
   const handleIframeLoad = () => {
-    setIsLoading(false);
+    setIframeState({
+      isLoading: false,
+      hasError: false,
+      errorMessage: '',
+    });
   };
-
-  // Handle iframe error events
+  
   const handleIframeError = () => {
-    setIsLoading(false);
-    setHasError(true);
+    setIframeState({
+      isLoading: false,
+      hasError: true,
+      errorMessage: 'Failed to load the embedded application',
+    });
   };
 
-  // Setup message listener for cross-origin communication
+  const toggleDarkMode = () => {
+    const newDarkMode = !darkMode;
+    setDarkMode(newDarkMode);
+    localStorage.setItem(STORAGE_KEYS.DARK_MODE, JSON.stringify(newDarkMode));
+  };
+
+  const handleLogout = () => {
+    // Clear all user-related data from storage
+    [
+      STORAGE_KEYS.USER_EMAIL,
+      STORAGE_KEYS.USER_NAME,
+      STORAGE_KEYS.AUTH_TOKEN
+    ].forEach(key => localStorage.removeItem(key));
+    
+    // Redirect to login page
+    navigate('/login');
+  };
+  
+  // Communication with iframe
+  const sendMessageToMicroFrontend = (message) => {
+    if (!iframeRef.current?.contentWindow) return;
+    
+    try {
+      iframeRef.current.contentWindow.postMessage(message, microFrontendUrl);
+    } catch (error) {
+      console.error('Failed to send message to microfrontend:', error);
+    }
+  };
+
+  // Listen for messages from the microfrontend
   useEffect(() => {
     const handleMessage = (event) => {
-      // Only accept messages from the microfrontend origin
-      if (event.origin !== 'http://localhost:5174') return;
+      // Security check: only accept messages from the expected origin
+      if (event.origin !== new URL(microFrontendUrl).origin) return;
       
-      // Handle messages from the microfrontend
-      console.log('Message from microfrontend:', event.data);
+      const { type, payload } = event.data || {};
       
-      // Example: Handle theme changes or other events
-      if (event.data.type === 'THEME_CHANGE') {
-        // Handle theme change request
+      switch (type) {
+        case 'THEME_CHANGE':
+          // Handle theme change request from iframe
+          if (payload?.darkMode !== undefined) {
+            setDarkMode(payload.darkMode);
+          }
+          break;
+          
+        case 'NAVIGATION':
+          // Handle navigation requests from iframe
+          if (payload?.path) {
+            navigate(payload.path);
+          }
+          break;
+          
+        case 'ERROR':
+          // Handle error messages from iframe
+          console.error('Error from microfrontend:', payload);
+          break;
+          
+        default:
+          // Log unhandled message types for debugging
+          console.log('Message from microfrontend:', event.data);
       }
     };
 
     window.addEventListener('message', handleMessage);
     
-    return () => {
-      window.removeEventListener('message', handleMessage);
-    };
-  }, []);
+    // Cleanup event listener on component unmount
+    return () => window.removeEventListener('message', handleMessage);
+  }, [navigate, microFrontendUrl]);
 
-  // Send message to the iframe
-  const sendMessageToMicroFrontend = (message) => {
-    if (iframeRef.current && iframeRef.current.contentWindow) {
-      iframeRef.current.contentWindow.postMessage(message, microFrontendUrl);
-    }
-  };
-
-  // Example: Send theme information to the microfrontend
+  // Send theme information to the microfrontend when theme changes
   useEffect(() => {
-    if (!isLoading && !hasError) {
-      sendMessageToMicroFrontend({
-        type: 'THEME',
-        payload: { darkMode }
-      });
-    }
-  }, [darkMode, isLoading, hasError]);
+    if (iframeState.isLoading || iframeState.hasError) return;
+    
+    sendMessageToMicroFrontend({
+      type: 'THEME',
+      payload: { darkMode }
+    });
+  }, [darkMode, iframeState.isLoading, iframeState.hasError]);
 
+  // Send bot ID to the microfrontend when it loads
+  useEffect(() => {
+    if (iframeState.isLoading || iframeState.hasError || !botId) return;
+    
+    sendMessageToMicroFrontend({
+      type: 'BOT_ID',
+      payload: { botId }
+    });
+  }, [botId, iframeState.isLoading, iframeState.hasError]);
+
+  // Ensure the iframe takes up the full available space
   return (
-    <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-neutral-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
-      <Header darkMode={darkMode} />
-      <div className="flex flex-1 h-[calc(100vh-4rem)] mt-[4rem]">
-        <Sidebar darkMode={darkMode} />
-        <main className="flex-1 flex flex-col relative" style={{ marginLeft: '16rem', height: 'calc(-61px + 100vh)', marginTop: '61px'}}>
-          <div className={`flex-1 flex flex-col rounded-lg shadow-lg ${darkMode ? 'bg-neutral-800' : 'bg-white'}`}>
-            {isLoading && (
-              <div className="flex items-center justify-center h-full">
-                <div className="flex flex-col items-center">
-                  <div className="flex space-x-2 mb-4">
-                    <div className={`w-3 h-3 rounded-full ${darkMode ? 'bg-blue-400' : 'bg-blue-600'} animate-bounce`} style={{ animationDelay: '0ms' }}></div>
-                    <div className={`w-3 h-3 rounded-full ${darkMode ? 'bg-blue-400' : 'bg-blue-600'} animate-bounce`} style={{ animationDelay: '150ms' }}></div>
-                    <div className={`w-3 h-3 rounded-full ${darkMode ? 'bg-blue-400' : 'bg-blue-600'} animate-bounce`} style={{ animationDelay: '300ms' }}></div>
-                  </div>
-                  <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Loading chat component...</p>
-                </div>
-              </div>
+    <SidebarProvider defaultOpen={true}>
+      <div className={cn(
+        'flex h-screen w-screen overflow-hidden',
+        darkMode ? 'dark bg-gray-900' : 'bg-white'
+      )}>
+        {/* Sidebar */}
+        <AppSidebar 
+          darkMode={darkMode} 
+          onToggleDarkMode={toggleDarkMode} 
+          onLogout={handleLogout} 
+        />
+        
+        {/* Main content area */}
+        <div className="flex-1 w-full h-full overflow-hidden">
+          <SidebarInset className="w-full h-full">
+            <div className="h-full w-full overflow-hidden">
+            {/* Loading state */}
+            {iframeState.isLoading && (
+              <LoadingIndicator darkMode={darkMode} />
             )}
             
-            {hasError && (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center p-6 max-w-md">
-                  <svg className="w-12 h-12 mx-auto text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                  </svg>
-                  <h3 className="text-lg font-medium mb-2">Failed to load chat component</h3>
-                  <p className="text-sm mb-4">The chat component could not be loaded. Please ensure the microfrontend server is running at {microFrontendUrl}.</p>
-                  <button 
-                    onClick={() => window.location.reload()}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-                  >
-                    Try Again
-                  </button>
-                </div>
-              </div>
+            {/* Error state */}
+            {iframeState.hasError && (
+              <ErrorDisplay 
+                darkMode={darkMode}
+                errorMessage={iframeState.errorMessage}
+                microFrontendUrl={microFrontendUrl}
+              />
             )}
             
+            {/* The iframe itself */}
             <iframe
               ref={iframeRef}
               src={microFrontendUrl}
-              className={`w-full h-full border-0 ${isLoading || hasError ? 'hidden' : 'block'}`}
+              className={cn(
+                'absolute inset-0 border-none',
+                iframeState.isLoading || iframeState.hasError ? 'hidden' : 'block'
+              )}
               onLoad={handleIframeLoad}
               onError={handleIframeError}
-              title="Chat Component"
+              title="Embedded Application"
               allow="microphone; camera"
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                width: '100%',
+                height: '100%',
+                border: 'none',
+                margin: 0,
+                padding: 0,
+                overflow: 'hidden',
+                zIndex: 5,
+                display: iframeState.isLoading || iframeState.hasError ? 'none' : 'block'
+              }}
             />
-          </div>
-        </main>
+            </div>
+          </SidebarInset>
+        </div>
+      </div>
+    </SidebarProvider>
+  );
+}
+
+/**
+ * Loading indicator component
+ * 
+ * @param {Object} props - Component props
+ * @param {boolean} props.darkMode - Whether dark mode is enabled
+ * @returns {JSX.Element} The loading indicator component
+ */
+function LoadingIndicator({ darkMode }) {
+  return (
+    <div className="absolute inset-0 flex items-center justify-center z-10">
+      <div className="flex flex-col items-center">
+        <div className="flex space-x-2 mb-4">
+          {[0, 150, 300].map((delay) => (
+            <div 
+              key={delay}
+              className={cn(
+                'w-3 h-3 rounded-full animate-bounce',
+                darkMode ? 'bg-blue-400' : 'bg-blue-600'
+              )}
+              style={{ animationDelay: `${delay}ms` }}
+            />
+          ))}
+        </div>
+        <p className={cn(
+          'text-sm',
+          darkMode ? 'text-gray-300' : 'text-gray-600'
+        )}>
+          Loading application...
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Error display component
+ * 
+ * @param {Object} props - Component props
+ * @param {boolean} props.darkMode - Whether dark mode is enabled
+ * @param {string} props.errorMessage - Error message to display
+ * @param {string} props.microFrontendUrl - URL of the microfrontend
+ * @returns {JSX.Element} The error display component
+ */
+function ErrorDisplay({ darkMode, errorMessage, microFrontendUrl }) {
+  return (
+    <div className="absolute inset-0 flex items-center justify-center z-10">
+      <div className={cn(
+        'text-center p-6 max-w-md rounded-lg shadow-lg',
+        darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
+      )}>
+        <svg 
+          className="w-12 h-12 mx-auto text-red-500 mb-4" 
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24" 
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            strokeWidth="2" 
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+          />
+        </svg>
+        <h3 className="text-lg font-medium mb-2">
+          {errorMessage || 'Failed to load application'}
+        </h3>
+        <p className="text-sm mb-4">
+          Please ensure the application server is running at{' '}
+          <code className={cn(
+            'px-1 py-0.5 rounded',
+            darkMode ? 'bg-gray-700' : 'bg-gray-100'
+          )}>
+            {microFrontendUrl}
+          </code>
+        </p>
+        <button 
+          onClick={() => window.location.reload()}
+          className={cn(
+            'px-4 py-2 rounded-md transition-colors',
+            'bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+            darkMode && 'focus:ring-offset-gray-800'
+          )}
+        >
+          Try Again
+        </button>
       </div>
     </div>
   );

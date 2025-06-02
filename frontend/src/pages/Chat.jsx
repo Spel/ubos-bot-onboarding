@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import { getFromStorage, STORAGE_KEYS } from "../utils/localStorage";
 import DOMPurify from 'dompurify';
 import Header from "../components/Header";
-import Sidebar from "../components/Sidebar";
 
 export default function Chat() {
   const { botId } = useParams();
@@ -331,8 +330,7 @@ console.log(greet("User"));`
     <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-neutral-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
       <Header darkMode={darkMode} />
       <div className="flex flex-1 h-[calc(100vh-4rem)] mt-[4rem]"> {/* Fixed height calculation and margin-top */}
-        <Sidebar />
-        <main className="flex-1 flex flex-col relative" style={{ marginLeft: '16rem', height: 'calc(-61px + 100vh)', marginTop: '61px'}}> {/* Added relative positioning */}
+        <main className="flex-1 flex flex-col relative">
           <div className={`flex-1 flex flex-col rounded-lg shadow-lg ${darkMode ? 'bg-neutral-800' : 'bg-white'}`}>
             {/* Messages area with flex-grow and overflow */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0"> {/* min-h-0 ensures proper scrolling */}
