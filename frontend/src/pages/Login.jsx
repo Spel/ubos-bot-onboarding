@@ -1,37 +1,83 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { saveToStorage, STORAGE_KEYS } from "../utils/localStorage";
+import { signIn, signUp, checkAuth } from "../utils/auth";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const loginAttemptInProgress = useRef(false);
+  
+  // Extract redirect destination from location state or default to '/onboarding'
+  const redirectTo = location.state?.from?.pathname || '/onboarding';
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setLoading(true);
+  // Check if user is already authenticated on component mount
+  useEffect(() => {
+    const verifyAuth = async () => {
+      try {
+        const isAuthenticated = await checkAuth();
+        if (isAuthenticated) {
+          navigate(redirectTo, { replace: true });
+        }
+      } finally {
+        // Mark authentication check as completed regardless of result
+        setAuthChecked(true);
+      }
+    };
     
-    // Simulate authentication
-    setTimeout(() => {
-      // Save user info to localStorage with proper logging
-      console.log('Saving authentication data to localStorage');
+    verifyAuth();
+  }, [navigate, redirectTo]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Prevent duplicate login attempts
+    if (loginAttemptInProgress.current) return;
+    
+    loginAttemptInProgress.current = true;
+    setLoading(true);
+    setError(null);
+    
+    try {
+      let userData;
       
-      // Save email to both keys for compatibility
-      saveToStorage(STORAGE_KEYS.USER_EMAIL, email);
-      saveToStorage(STORAGE_KEYS.EMAIL, email);
+      if (isSignUp) {
+        // Sign up new user with OpenWebUI
+        userData = await signUp(email, password, name || email.split('@')[0]);
+      } else {
+        // Sign in existing user with OpenWebUI
+        userData = await signIn(email, password);
+      }
       
-      // Set authentication flag
-      saveToStorage(STORAGE_KEYS.IS_AUTHENTICATED, true);
+      console.log('Authentication successful:', userData);
       
-      console.log('Authentication data saved, redirecting to onboarding');
-      
-      // Use React Router's navigate instead of window.location.href
-      navigate('/onboarding');
+      // Navigate immediately after successful authentication
+      navigate(redirectTo, { replace: true });
+    } catch (error) {
+      console.error('Authentication error:', error);
+      setError(error.message || (isSignUp ? 'Failed to sign up' : 'Failed to sign in'));
+      // Reset login attempt flag to allow retry
+      loginAttemptInProgress.current = false;
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
+
+  // Don't render the login form until we've checked authentication status
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -53,14 +99,50 @@ export default function Login() {
               : "Don't have an account? "}
             <button
               className="font-medium text-blue-600 hover:text-blue-500"
-              onClick={() => setIsSignUp(!isSignUp)}
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setError(null);
+              }}
             >
               {isSignUp ? "Sign in" : "Sign up"}
             </button>
           </p>
         </div>
+        
+        {/* Display error message if present */}
+        {error && (
+          <div className="rounded-md bg-red-50 p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">{error}</h3>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
+            {isSignUp && (
+              <div>
+                <label htmlFor="name" className="sr-only">Full Name</label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  autoComplete="name"
+                  required={isSignUp}
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                  placeholder="Full Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+            )}
             <div>
               <label htmlFor="email-address" className="sr-only">Email address</label>
               <input
@@ -69,7 +151,7 @@ export default function Login() {
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                className={`appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 ${isSignUp ? '' : 'rounded-t-md'} focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -81,7 +163,7 @@ export default function Login() {
                 id="password"
                 name="password"
                 type="password"
-                autoComplete="current-password"
+                autoComplete={isSignUp ? "new-password" : "current-password"}
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Password"

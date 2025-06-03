@@ -22,6 +22,10 @@ export default function MicroFrontendChat() {
     errorMessage: '',
   });
   
+  // Get authentication token
+  const authToken = getFromStorage(STORAGE_KEYS.OPEN_WEBUI_AUTH_TOKEN, null) || 
+                   getFromStorage('ubos_auth_token', null);
+  
   // URL for the microfrontend - could be environment variable in production
   const microFrontendUrl = 'http://localhost:3000/';
   
@@ -32,6 +36,14 @@ export default function MicroFrontendChat() {
       hasError: false,
       errorMessage: '',
     });
+    
+    // Send the auth token when iframe is loaded
+    if (authToken) {
+      sendMessageToMicroFrontend({
+        type: 'AUTH_TOKEN',
+        payload: { token: authToken }
+      });
+    }
   };
   
   const handleIframeError = () => {
@@ -53,7 +65,8 @@ export default function MicroFrontendChat() {
     [
       STORAGE_KEYS.USER_EMAIL,
       STORAGE_KEYS.USER_NAME,
-      STORAGE_KEYS.AUTH_TOKEN
+      STORAGE_KEYS.AUTH_TOKEN,
+      STORAGE_KEYS.OPEN_WEBUI_AUTH_TOKEN
     ].forEach(key => localStorage.removeItem(key));
     
     // Redirect to login page
@@ -94,6 +107,16 @@ export default function MicroFrontendChat() {
           }
           break;
           
+        case 'AUTH_REQUEST':
+          // Handle authentication request from iframe
+          if (authToken) {
+            sendMessageToMicroFrontend({
+              type: 'AUTH_TOKEN',
+              payload: { token: authToken }
+            });
+          }
+          break;
+          
         case 'ERROR':
           // Handle error messages from iframe
           console.error('Error from microfrontend:', payload);
@@ -109,7 +132,7 @@ export default function MicroFrontendChat() {
     
     // Cleanup event listener on component unmount
     return () => window.removeEventListener('message', handleMessage);
-  }, [navigate, microFrontendUrl]);
+  }, [navigate, microFrontendUrl, authToken]);
 
   // Send theme information to the microfrontend when theme changes
   useEffect(() => {
@@ -130,6 +153,16 @@ export default function MicroFrontendChat() {
       payload: { botId }
     });
   }, [botId, iframeState.isLoading, iframeState.hasError]);
+
+  // Send auth token to iframe when component mounts or token changes
+  useEffect(() => {
+    if (iframeState.isLoading || iframeState.hasError || !authToken) return;
+    
+    sendMessageToMicroFrontend({
+      type: 'AUTH_TOKEN',
+      payload: { token: authToken }
+    });
+  }, [authToken, iframeState.isLoading, iframeState.hasError]);
 
   // Ensure the iframe takes up the available space while respecting sidebar width
   return (
@@ -156,7 +189,7 @@ export default function MicroFrontendChat() {
             {/* The iframe itself */}
             <iframe
               ref={iframeRef}
-              src={microFrontendUrl}
+              src={`${microFrontendUrl}?token=${authToken || ''}`}
               className={cn(
                 'absolute inset-0 border-none',
                 iframeState.isLoading || iframeState.hasError ? 'hidden' : 'block'

@@ -60,20 +60,31 @@ export const signIn = async (email, password) => {
       credentials: 'include', // Include cookies in the request
     });
 
+    // Get the response data regardless of success or failure
+    const responseData = await response.json().catch(e => ({ detail: 'Failed to parse response' }));
+
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || 'Failed to sign in');
+      // Extract the proper error message
+      if (response.status === 400) {
+        // Handle common authentication errors
+        throw new Error(responseData.detail || 'Invalid email or password');
+      } else {
+        throw new Error(responseData.detail || `Login failed (${response.status})`);
+      }
     }
 
-    const data = await response.json();
-    
     // Store the token for future use
-    if (data.token) {
-      storeToken(data.token);
+    if (responseData.token) {
+      storeToken(responseData.token);
     }
     
-    return data;
+    return responseData;
   } catch (error) {
+    // If this is a network error, provide a more user-friendly message
+    if (error.message === 'Failed to fetch') {
+      throw new Error('Unable to connect to authentication server. Please check your connection.');
+    }
+    
     console.error('Sign in error:', error);
     throw error;
   }
