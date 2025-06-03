@@ -1,11 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getFromStorage, STORAGE_KEYS } from '../utils/localStorage';
-import {
-  SidebarProvider,
-  SidebarInset,
-} from '../components/ui/sidebar';
-import { AppSidebar } from '../components/sidebar/app-sidebar';
 import { cn } from '../utils/cn';
 
 /**
@@ -136,24 +131,14 @@ export default function MicroFrontendChat() {
     });
   }, [botId, iframeState.isLoading, iframeState.hasError]);
 
-  // Ensure the iframe takes up the full available space
+  // Ensure the iframe takes up the available space while respecting sidebar width
   return (
-    <SidebarProvider defaultOpen={true}>
-      <div className={cn(
-        'flex h-screen w-screen overflow-hidden',
-        darkMode ? 'dark bg-gray-900' : 'bg-white'
-      )}>
-        {/* Sidebar */}
-        <AppSidebar 
-          darkMode={darkMode} 
-          onToggleDarkMode={toggleDarkMode} 
-          onLogout={handleLogout} 
-        />
-        
-        {/* Main content area */}
-        <div className="flex-1 w-full h-full overflow-hidden">
-          <SidebarInset className="w-full h-full">
-            <div className="h-full w-full overflow-hidden">
+    <div className={cn(
+      'h-screen overflow-hidden flex-grow',
+      darkMode ? 'dark bg-gray-900' : 'bg-white'
+    )}>
+      {/* Main content area */}
+      <div className="h-full w-full overflow-hidden relative">
             {/* Loading state */}
             {iframeState.isLoading && (
               <LoadingIndicator darkMode={darkMode} />
@@ -197,11 +182,8 @@ export default function MicroFrontendChat() {
                 display: iframeState.isLoading || iframeState.hasError ? 'none' : 'block'
               }}
             />
-            </div>
-          </SidebarInset>
-        </div>
       </div>
-    </SidebarProvider>
+    </div>
   );
 }
 

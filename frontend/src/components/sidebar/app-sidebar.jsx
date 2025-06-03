@@ -156,9 +156,8 @@ export function AppSidebar({ darkMode, onToggleDarkMode, onLogout, ...props }) {
   ];
 
   // Determine which navigation items to show based on mode
-  const navItems = isCreatorMode 
-    ? [...commonNavItems, ...creatorNavItems]
-    : commonNavItems;
+  // Only show common items in the main navigation
+  const navItems = commonNavItems;
 
   // Calculate remaining credits
   const remainingTpuSeconds = tpuSeconds - usedTpuSeconds;

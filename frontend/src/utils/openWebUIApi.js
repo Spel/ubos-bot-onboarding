@@ -143,12 +143,20 @@ export const storeToken = (token) => {
 /**
  * Clear the stored API token
  */
-export const clearToken = () => {
+export const clearAuthToken = () => {
   try {
     localStorage.removeItem(STORAGE_KEYS.OPEN_WEBUI_AUTH_TOKEN);
   } catch (error) {
     console.error('Error clearing token:', error);
   }
+};
+
+/**
+ * Get the authentication token for API requests
+ * @returns {string|null} The authentication token or null if not found
+ */
+export const getAuthToken = () => {
+  return getStoredToken();
 };
 
 /**

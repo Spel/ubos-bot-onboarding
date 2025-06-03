@@ -71,7 +71,7 @@ export function AppLayout({ children }) {
             onLogout={handleLogout}
           />
           <SidebarInset className="flex flex-col min-h-screen">
-            <div className="container mx-auto p-4 md:p-6">
+            <div className="container mx-auto ">
               {children || <Outlet />}
             </div>
           </SidebarInset>

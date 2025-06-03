@@ -3,14 +3,6 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import Header from "../components/Header";
 import { getFromStorage, saveToStorage, STORAGE_KEYS } from "../utils/localStorage";
 import { getBots, getBotsByType } from "../utils/botsData";
-import {
-  SidebarProvider,
-  Sidebar,
-  SidebarTrigger,
-  SidebarInset,
-  SidebarCollapseTrigger
-} from "../components/ui/sidebar";
-import { AppSidebar } from "../components/sidebar/app-sidebar";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -279,12 +271,9 @@ export default function Home() {
   };
 
   return (
-    <SidebarProvider defaultOpen={true}>
-      <div className="flex h-screen overflow-hidden">
-        <AppSidebar darkMode={darkMode} onToggleDarkMode={toggleDarkMode} onLogout={handleLogout} />
-        <SidebarInset>
-          <main className="flex-1 overflow-y-auto">
-            <div className="p-4 md:p-6 max-w-6xl mx-auto">
+    <div className="h-screen overflow-hidden">
+      <main className="flex-1 overflow-y-auto">
+        <div className="p-4 md:p-6 max-w-6xl mx-auto">
               {/* Greeting Section */}
               <div className="text-center mb-6">
                 <h1 className="text-5xl font-bold mb-3">
@@ -554,11 +543,9 @@ export default function Home() {
                 </p>
               </Link>
             </div>
-          </div> </div>
-          </main>
-         
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
+          </div>
+        </div>
+      </main>
+    </div>
   );
 }
