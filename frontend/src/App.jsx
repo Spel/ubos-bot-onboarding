@@ -21,6 +21,7 @@ import AgentViewABTest from './pages/AgentViewABTest';
 import CompanyManagement from './pages/CompanyManagement';
 import ProductLanding from './pages/ProductLanding';
 import Marketplace from './pages/Marketplace';
+import UserManagement from './pages/UserManagement';
 import { getFromStorage, saveToStorage, STORAGE_KEYS } from './utils/localStorage';
 import { AppLayout } from './components/layout/app-layout';
 
@@ -123,6 +124,7 @@ function App() {
           <Route path="/agent-original/:botId" element={<AgentView />} />
           <Route path="/agent-improved/:botId" element={<AgentViewImproved />} />
           <Route path="/company-management" element={<CompanyManagement />} />
+          <Route path="/user-management" element={<UserManagement />} />
         </Route>
         
         {/* Fallback route */}

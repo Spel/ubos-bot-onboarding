@@ -3,8 +3,15 @@ import { getUsers, deleteUser, isAuthenticated, signIn } from "../utils/openWebU
 
 /**
  * Component for displaying and managing Open WebUI users
+ * @param {Object} props - Component props
+ * @param {boolean} props.darkMode - Whether dark mode is enabled
+ * @param {Function} props.onEditUser - Handler for editing a user
+ * @param {Function} props.onUserDeleted - Handler called after user deletion
+ * @param {Function} props.onError - Handler for errors
+ * @param {Function} props.onLoginRequired - Handler called when login is required
+ * @param {boolean} props.skipAuthCheck - Whether to skip the authentication check
  */
-const OpenWebUIUserTable = ({ darkMode, onEditUser, onUserDeleted, onError, onLoginRequired }) => {
+const OpenWebUIUserTable = ({ darkMode, onEditUser, onUserDeleted, onError, onLoginRequired, skipAuthCheck = false }) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,14 +29,16 @@ const OpenWebUIUserTable = ({ darkMode, onEditUser, onUserDeleted, onError, onLo
     setError(null);
 
     try {
-      // Check if authenticated
-      const authenticated = await isAuthenticated();
-      if (!authenticated) {
-        if (onLoginRequired) {
-          onLoginRequired();
+      // Check if authenticated, unless we're skipping the auth check
+      if (!skipAuthCheck) {
+        const authenticated = await isAuthenticated();
+        if (!authenticated) {
+          if (onLoginRequired) {
+            onLoginRequired();
+          }
+          setLoading(false);
+          return;
         }
-        setLoading(false);
-        return;
       }
 
       const userData = await getUsers();

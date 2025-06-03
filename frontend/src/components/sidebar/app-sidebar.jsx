@@ -17,6 +17,7 @@ import {
   LogOut,
   Sun,
   Moon,
+  UserCog,
 } from "lucide-react";
 
 import { getFromStorage, saveToStorage, STORAGE_KEYS } from "../../utils/localStorage";
@@ -149,8 +150,15 @@ export function AppSidebar({ darkMode, onToggleDarkMode, onLogout, ...props }) {
     {
       title: "Admin",
       url: "/admin",
-      icon: Users,
+      icon: Settings,
       isActive: location.pathname === '/admin',
+      items: [],
+    },
+    {
+      title: "User Management",
+      url: "/user-management",
+      icon: UserCog,
+      isActive: location.pathname === '/user-management',
       items: [],
     },
   ];

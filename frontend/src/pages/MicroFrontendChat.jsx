@@ -23,7 +23,7 @@ export default function MicroFrontendChat() {
   });
   
   // URL for the microfrontend - could be environment variable in production
-  const microFrontendUrl = 'http://localhost:5050/';
+  const microFrontendUrl = 'http://localhost:3000/';
   
   // Event handlers
   const handleIframeLoad = () => {

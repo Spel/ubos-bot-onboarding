@@ -5,7 +5,7 @@ import { getFromStorage, saveToStorage, STORAGE_KEYS } from './localStorage';
 
 // Default API configuration
 const DEFAULT_API_CONFIG = {
-  baseUrl: 'http://localhost:8081',
+  baseUrl: 'http://localhost:8000',
   apiPath: '/api/v1'
 };
 
@@ -85,30 +85,82 @@ export const signIn = async (email, password) => {
  * @param {string} password - User password
  * @param {string} name - User name
  * @param {string} [profileImageUrl] - Optional profile image URL
+ * @param {string} [token] - Authentication token (optional if using stored token)
+ * @param {boolean} [requireAuth=false] - Whether to require authentication
  * @returns {Promise<Object>} New user data
  */
-export const createUser = async (email, password, name, profileImageUrl = null) => {
+export const createUser = async (email, password, name, profileImageUrl = "", token = null, requireAuth = false) => {
   try {
-    const response = await fetch(getApiUrl('/auths/signup'), {
+    const authToken = token || getAuthToken();
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (authToken) {
+      headers['Authorization'] = `Bearer ${authToken}`;
+    } else if (requireAuth) {
+      throw new Error('No authentication token available');
+    }
+    
+    // First try the admin endpoint to add a user
+    try {
+      const response = await fetch(getApiUrl('/auths/add'), {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          email,
+          password,
+          name,
+          profile_image_url: profileImageUrl || "", // Ensure profile_image_url is never null
+          role: 'user' // Default role for new users
+        }),
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        return await response.json();
+      }
+      
+      // If admin endpoint fails with 403, we'll try the signup endpoint
+      if (response.status === 403) {
+        console.warn('Admin user creation failed, trying regular signup');
+      } else {
+        // For other errors, throw the error from the admin endpoint
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to create user');
+      }
+    } catch (adminError) {
+      // Only log the admin endpoint error for now
+      console.error('Admin user creation error:', adminError);
+      
+      // For permission errors, we'll try the signup endpoint
+      if (adminError.message.includes('permission') || adminError.message.includes('403')) {
+        // Continue to signup endpoint
+      } else {
+        // Otherwise rethrow the admin endpoint error
+        throw adminError;
+      }
+    }
+    
+    // Fallback to regular signup endpoint
+    const signupResponse = await fetch(getApiUrl('/auths/signup'), {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify({
         email,
         password,
         name,
-        profile_image_url: profileImageUrl
+        profile_image_url: profileImageUrl || "" // Ensure profile_image_url is never null
       }),
-      credentials: 'include', // Include cookies in the request
+      credentials: 'include',
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
+    if (!signupResponse.ok) {
+      const errorData = await signupResponse.json();
       throw new Error(errorData.detail || 'Failed to create user');
     }
 
-    return await response.json();
+    return await signupResponse.json();
   } catch (error) {
     console.error('Create user error:', error);
     throw error;
@@ -160,23 +212,27 @@ export const getAuthToken = () => {
 };
 
 /**
- * Get all users (requires admin privileges)
+ * Get all users (authentication is now optional)
  * @param {string} [token] - Authentication token (optional if using stored token)
+ * @param {boolean} [requireAuth=false] - Whether to require authentication
  * @returns {Promise<Array>} List of users
  */
-export const getUsers = async (token = null) => {
+export const getUsers = async (token = null, requireAuth = false) => {
   try {
     const authToken = token || getAuthToken();
-    if (!authToken) {
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (authToken) {
+      headers['Authorization'] = `Bearer ${authToken}`;
+    } else if (requireAuth) {
       throw new Error('No authentication token available');
     }
     
     const response = await fetch(getApiUrl('/users'), {
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${authToken}`,
-        'Content-Type': 'application/json',
-      },
+      headers,
       credentials: 'include', // Include cookies in the request
     });
 
@@ -196,21 +252,25 @@ export const getUsers = async (token = null) => {
  * Get a specific user by ID
  * @param {string} userId - The ID of the user to retrieve
  * @param {string} [token] - Authentication token (optional if using stored token)
+ * @param {boolean} [requireAuth=false] - Whether to require authentication
  * @returns {Promise<Object>} User data
  */
-export const getUserById = async (userId, token = null) => {
+export const getUserById = async (userId, token = null, requireAuth = false) => {
   try {
     const authToken = token || getAuthToken();
-    if (!authToken) {
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (authToken) {
+      headers['Authorization'] = `Bearer ${authToken}`;
+    } else if (requireAuth) {
       throw new Error('No authentication token available');
     }
     
     const response = await fetch(getApiUrl(`/users/${userId}`), {
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${authToken}`,
-        'Content-Type': 'application/json',
-      },
+      headers,
       credentials: 'include',
     });
 
@@ -231,21 +291,25 @@ export const getUserById = async (userId, token = null) => {
  * @param {string} userId - The ID of the user to update
  * @param {Object} userData - The user data to update
  * @param {string} [token] - Authentication token (optional if using stored token)
+ * @param {boolean} [requireAuth=false] - Whether to require authentication
  * @returns {Promise<Object>} Updated user data
  */
-export const updateUser = async (userId, userData, token = null) => {
+export const updateUser = async (userId, userData, token = null, requireAuth = false) => {
   try {
     const authToken = token || getAuthToken();
-    if (!authToken) {
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (authToken) {
+      headers['Authorization'] = `Bearer ${authToken}`;
+    } else if (requireAuth) {
       throw new Error('No authentication token available');
     }
     
     const response = await fetch(getApiUrl(`/users/${userId}`), {
       method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${authToken}`,
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify(userData),
       credentials: 'include',
     });
@@ -266,21 +330,25 @@ export const updateUser = async (userId, userData, token = null) => {
  * Delete a user
  * @param {string} userId - The ID of the user to delete
  * @param {string} [token] - Authentication token (optional if using stored token)
+ * @param {boolean} [requireAuth=false] - Whether to require authentication
  * @returns {Promise<boolean>} True if deletion was successful
  */
-export const deleteUser = async (userId, token = null) => {
+export const deleteUser = async (userId, token = null, requireAuth = false) => {
   try {
     const authToken = token || getAuthToken();
-    if (!authToken) {
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (authToken) {
+      headers['Authorization'] = `Bearer ${authToken}`;
+    } else if (requireAuth) {
       throw new Error('No authentication token available');
     }
     
     const response = await fetch(getApiUrl(`/users/${userId}`), {
       method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${authToken}`,
-        'Content-Type': 'application/json',
-      },
+      headers,
       credentials: 'include',
     });
 
