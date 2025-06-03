@@ -102,58 +102,20 @@ export const signIn = async (email, password) => {
  */
 export const createUser = async (email, password, name, profileImageUrl = "", token = null, requireAuth = false) => {
   try {
-    const authToken = token || getAuthToken();
+    // Set up headers with content type
     const headers = {
       'Content-Type': 'application/json',
     };
     
-    if (authToken) {
+    // Only add authorization header if we have a token and it's explicitly needed
+    const authToken = token || getAuthToken();
+    if (authToken && requireAuth) {
       headers['Authorization'] = `Bearer ${authToken}`;
-    } else if (requireAuth) {
-      throw new Error('No authentication token available');
     }
     
-    // First try the admin endpoint to add a user
-    try {
-      const response = await fetch(getApiUrl('/auths/add'), {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          email,
-          password,
-          name,
-          profile_image_url: profileImageUrl || "", // Ensure profile_image_url is never null
-          role: 'user' // Default role for new users
-        }),
-        credentials: 'include',
-      });
-
-      if (response.ok) {
-        return await response.json();
-      }
-      
-      // If admin endpoint fails with 403, we'll try the signup endpoint
-      if (response.status === 403) {
-        console.warn('Admin user creation failed, trying regular signup');
-      } else {
-        // For other errors, throw the error from the admin endpoint
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to create user');
-      }
-    } catch (adminError) {
-      // Only log the admin endpoint error for now
-      console.error('Admin user creation error:', adminError);
-      
-      // For permission errors, we'll try the signup endpoint
-      if (adminError.message.includes('permission') || adminError.message.includes('403')) {
-        // Continue to signup endpoint
-      } else {
-        // Otherwise rethrow the admin endpoint error
-        throw adminError;
-      }
-    }
+    console.log('Creating user with Open WebUI via signup endpoint:', { email, name });
     
-    // Fallback to regular signup endpoint
+    // Use the /auths/signup endpoint first
     const signupResponse = await fetch(getApiUrl('/auths/signup'), {
       method: 'POST',
       headers,
@@ -166,12 +128,75 @@ export const createUser = async (email, password, name, profileImageUrl = "", to
       credentials: 'include',
     });
 
+    const responseData = await signupResponse.json().catch(e => ({ detail: 'Failed to parse response' }));
+
     if (!signupResponse.ok) {
-      const errorData = await signupResponse.json();
-      throw new Error(errorData.detail || 'Failed to create user');
+      // If signup endpoint fails and we have a token, try the admin endpoint as fallback
+      if ((signupResponse.status === 401 || signupResponse.status === 403) && authToken) {
+        console.log('Signup endpoint access denied, falling back to admin endpoint');
+        
+        // Add authorization header for admin endpoint
+        const adminHeaders = {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        };
+        
+        const adminResponse = await fetch(getApiUrl('/auths/add'), {
+          method: 'POST',
+          headers: adminHeaders,
+          body: JSON.stringify({
+            email,
+            password,
+            name,
+            profile_image_url: profileImageUrl || "",
+            role: 'user' // Default role for new users
+          }),
+          credentials: 'include',
+        });
+        
+        if (!adminResponse.ok) {
+          const errorData = await adminResponse.json().catch(e => ({ detail: 'Failed to parse response' }));
+          
+          if (adminResponse.status === 409) {
+            throw new Error('User with this email already exists');
+          } else if (adminResponse.status === 400) {
+            throw new Error(errorData.detail || 'Invalid registration data');
+          } else if (adminResponse.status === 401 || adminResponse.status === 403) {
+            throw new Error('You do not have permission to create users. Please contact your administrator.');
+          } else {
+            throw new Error(errorData.detail || `User creation failed (${adminResponse.status})`);
+          }
+        }
+
+        const adminResponseData = await adminResponse.json();
+        
+        if (adminResponseData.token) {
+          storeToken(adminResponseData.token);
+        }
+        
+        console.log('Successfully created user via admin endpoint');
+        return adminResponseData;
+      } else {
+        // Handle specific error cases for signup endpoint
+        if (signupResponse.status === 409) {
+          throw new Error('User with this email already exists');
+        } else if (signupResponse.status === 400) {
+          throw new Error(responseData.detail || 'Invalid registration data');
+        } else if (signupResponse.status === 401 || signupResponse.status === 403) {
+          throw new Error('User registration is disabled. Please contact your administrator for an account.');
+        } else {
+          throw new Error(responseData.detail || `Registration failed (${signupResponse.status})`);
+        }
+      }
+    }
+    
+    // If we get a token from signup, store it
+    if (responseData.token) {
+      storeToken(responseData.token);
     }
 
-    return await signupResponse.json();
+    console.log('Successfully created user via signup endpoint');
+    return responseData;
   } catch (error) {
     console.error('Create user error:', error);
     throw error;

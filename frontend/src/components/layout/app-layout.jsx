@@ -58,8 +58,8 @@ export function AppLayout({ children }) {
   }, [darkMode]);
 
   // Don't show sidebar for login, onboarding, and product landing pages
-  const noSidebarRoutes = ['/login', '/onboarding', '/product'];
-  const showSidebar = isLoggedIn && !noSidebarRoutes.includes(location.pathname);
+  const noSidebarRoutes = ['/login', '/onboarding', '/product', '/agentviewimproved', '/agent'];
+  const showSidebar = isLoggedIn && !noSidebarRoutes.some(route => location.pathname.toLowerCase().startsWith(route));
 
   return (
     <div className={`min-h-screen ${darkMode ? 'dark bg-neutral-950 text-white' : 'bg-gray-50 text-gray-900'}`}>

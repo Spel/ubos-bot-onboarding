@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { saveToStorage, getFromStorage, STORAGE_KEYS } from "../utils/localStorage";
 import { addBot } from "../utils/botsData";
+import { getUserProfile } from "../utils/userStorage";
 
 export default function Onboarding() {
   const [step, setStep] = useState(0);
@@ -19,6 +20,15 @@ export default function Onboarding() {
   // Check if user is authenticated
   const isAuthenticated = getFromStorage(STORAGE_KEYS.IS_AUTHENTICATED, false);
   const userEmail = getFromStorage(STORAGE_KEYS.USER_EMAIL, '');
+  
+  // Check if user has admin role
+  useEffect(() => {
+    const userProfile = getUserProfile();
+    if (userProfile && userProfile.role === 'admin') {
+      console.log('User has admin role, skipping onboarding');
+      handleComplete();
+    }
+  }, []);
   
   // Redirect to login if not authenticated
   useEffect(() => {

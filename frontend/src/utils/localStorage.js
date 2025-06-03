@@ -108,9 +108,12 @@ export const clearAllStorage = () => {
 export const clearAuthData = () => {
   try {
     console.log('Clearing authentication data from localStorage');
-    saveToStorage(STORAGE_KEYS.IS_AUTHENTICATED, false);
-    saveToStorage(STORAGE_KEYS.USER_EMAIL, '');
-    saveToStorage(STORAGE_KEYS.EMAIL, '');
+    // Remove auth data completely instead of just setting to false
+    removeFromStorage(STORAGE_KEYS.IS_AUTHENTICATED);
+    removeFromStorage(STORAGE_KEYS.USER_EMAIL);
+    removeFromStorage(STORAGE_KEYS.EMAIL);
+    removeFromStorage(STORAGE_KEYS.USER_NAME);
+    removeFromStorage(STORAGE_KEYS.OPEN_WEBUI_AUTH_TOKEN);
     console.log('Authentication data cleared');
     return true;
   } catch (error) {

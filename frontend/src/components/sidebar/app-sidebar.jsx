@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Home,
   Settings,
@@ -20,7 +20,7 @@ import {
   UserCog,
 } from "lucide-react";
 
-import { getFromStorage, saveToStorage, STORAGE_KEYS } from "../../utils/localStorage";
+import { getFromStorage, saveToStorage, clearAuthData, STORAGE_KEYS } from "../../utils/localStorage";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import {
@@ -44,8 +44,9 @@ import {
  * @param {Function} props.onToggleDarkMode - Dark mode toggle handler
  * @param {Function} props.onLogout - Logout handler function
  */
-export function AppSidebar({ darkMode, onToggleDarkMode, onLogout, ...props }) {
+export function AppSidebar({ darkMode, onToggleDarkMode, onLogout: externalOnLogout, ...props }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [isCreatorMode, setIsCreatorMode] = useState(
     getFromStorage(STORAGE_KEYS.USER_MODE, 'user') === 'creator'
@@ -54,6 +55,19 @@ export function AppSidebar({ darkMode, onToggleDarkMode, onLogout, ...props }) {
     getFromStorage(STORAGE_KEYS.CREDITS, 2592000)
   );
   const [usedTpuSeconds, setUsedTpuSeconds] = useState(0);
+
+  // Handle logout function
+  const handleLogout = () => {
+    // Clear authentication data
+    // clearAuthData();
+    
+    // // Force navigation to login page with replace to prevent going back
+    // window.location.href = '/login';
+
+     clearAuthData();
+        navigate('/login');
+   
+  };
 
   // Fetch user data from localStorage on mount
   useEffect(() => {
@@ -281,7 +295,7 @@ export function AppSidebar({ darkMode, onToggleDarkMode, onLogout, ...props }) {
           user={user || { name: "User", email: "user@example.com", avatar: null }} 
           darkMode={darkMode} 
           onToggleDarkMode={onToggleDarkMode} 
-          onLogout={onLogout} 
+          onLogout={handleLogout} 
         />
 
         {/* Credits indicator */}

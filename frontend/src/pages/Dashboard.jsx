@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from "react";
-import Header from "../components/Header";
-import Sidebar from "../components/Sidebar";
+import { Link, useLocation } from "react-router-dom";
 import { saveToStorage, getFromStorage, STORAGE_KEYS } from "../utils/localStorage";
 import { getBotCount, getActiveBotCount, getBotsByType, getBots } from "../utils/botsData";
 import { getUserProfile } from "../utils/userStorage";
 import { getDashboardData, getUsageStatistics, getRecentActivities } from "../utils/metricStorage";
-import { Link, useLocation } from "react-router-dom";
 
 export default function Dashboard() {
   const location = useLocation();
@@ -24,20 +22,7 @@ export default function Dashboard() {
   const [tpuHours, setTpuHours] = useState(0);
   const [usedTpuHours, setUsedTpuHours] = useState(0);
   
-  // Toggle dark mode function
-  const toggleDarkMode = () => {
-    const newDarkMode = !darkMode;
-    setDarkMode(newDarkMode);
-    
-    // Save dark mode preference to localStorage
-    saveToStorage(STORAGE_KEYS.DARK_MODE, newDarkMode);
-    
-    if (newDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  };
+  // Dark mode is now handled by the AppLayout component
   
   const [botCount, setBotCount] = useState(0);
   const [activeBotCount, setActiveBotCount] = useState(0);
@@ -126,24 +111,21 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-neutral-900' : 'bg-gray-50'}`}>
-      <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-        <Sidebar darkMode={darkMode} />
-      <div style={{ paddingLeft: '16rem', paddingTop: '61px' }}>
-        <main className="w-full overflow-y-auto p-4">
+    <div className="flex flex-col h-full w-full">
+      <main className="flex-1 overflow-y-auto p-4 md:p-6">
           {/* Dashboard Header */}
           <div className="mb-6">
-            <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Dashboard</h1>
-            <p className={`mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Welcome to your UBOS bot dashboard</p>
+            <h1 className="text-2xl font-bold dark:text-white text-gray-800">Dashboard</h1>
+            <p className="mt-1 dark:text-gray-400 text-gray-600">Welcome to your Agentspace dashboard</p>
           </div>
           
           {/* Bot Statistics Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
             {/* Total Bots Card */}
-            <div className={`${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'} border rounded-xl shadow-sm p-6`}>
+            <div className="border rounded-xl shadow-sm p-6 dark:bg-neutral-800 dark:border-neutral-700 bg-white border-gray-200">
               <div className="flex items-center gap-x-4">
-                <div className={`inline-flex justify-center items-center size-[62px] rounded-full ${darkMode ? 'bg-neutral-700' : 'bg-blue-100'}`}>
-                  <svg className={`size-6 ${darkMode ? 'text-blue-500' : 'text-blue-600'}`} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <div className="inline-flex justify-center items-center size-[62px] rounded-full dark:bg-neutral-700 bg-blue-100">
+                  <svg className="size-6 dark:text-blue-500 text-blue-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect width="18" height="18" x="3" y="3" rx="2" />
                     <circle cx="9" cy="9" r="2" />
                     <circle cx="15" cy="9" r="2" />
@@ -151,46 +133,46 @@ export default function Dashboard() {
                   </svg>
                 </div>
                 <div className="flex flex-col">
-                  <span className={`text-xs font-semibold uppercase tracking-wide ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Total Bots</span>
+                  <span className="text-xs font-semibold uppercase tracking-wide dark:text-gray-400 text-gray-500">Total Bots</span>
                   <div className="mt-1 flex items-center gap-x-2">
-                    <h3 className={`text-xl sm:text-2xl font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{botCount}</h3>
+                    <h3 className="text-xl sm:text-2xl font-medium dark:text-white text-gray-800">{botCount}</h3>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Active Bots Card */}
-            <div className={`${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'} border rounded-xl shadow-sm p-6`}>
+            <div className="border rounded-xl shadow-sm p-6 dark:bg-neutral-800 dark:border-neutral-700 bg-white border-gray-200">
               <div className="flex items-center gap-x-4">
-                <div className={`inline-flex justify-center items-center size-[62px] rounded-full ${darkMode ? 'bg-neutral-700' : 'bg-green-100'}`}>
-                  <svg className={`size-6 ${darkMode ? 'text-green-500' : 'text-green-600'}`} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <div className="inline-flex justify-center items-center size-[62px] rounded-full dark:bg-neutral-700 bg-green-100">
+                  <svg className="size-6 dark:text-green-500 text-green-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                     <polyline points="22 4 12 14.01 9 11.01" />
                   </svg>
                 </div>
                 <div className="flex flex-col">
-                  <span className={`text-xs font-semibold uppercase tracking-wide ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Active Bots</span>
+                  <span className="text-xs font-semibold uppercase tracking-wide dark:text-gray-400 text-gray-500">Active Bots</span>
                   <div className="mt-1 flex items-center gap-x-2">
-                    <h3 className={`text-xl sm:text-2xl font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{activeBotCount}</h3>
+                    <h3 className="text-xl sm:text-2xl font-medium dark:text-white text-gray-800">{activeBotCount}</h3>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Bot Types Card */}
-            <div className={`${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'} border rounded-xl shadow-sm p-6`}>
+            <div className="border rounded-xl shadow-sm p-6 dark:bg-neutral-800 dark:border-neutral-700 bg-white border-gray-200">
               <div className="flex items-center gap-x-4">
-                <div className={`inline-flex justify-center items-center size-[62px] rounded-full ${darkMode ? 'bg-neutral-700' : 'bg-purple-100'}`}>
-                  <svg className={`size-6 ${darkMode ? 'text-purple-500' : 'text-purple-600'}`} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <div className="inline-flex justify-center items-center size-[62px] rounded-full dark:bg-neutral-700 bg-purple-100">
+                  <svg className="size-6 dark:text-purple-500 text-purple-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 2H2v10h10V2Z" />
                     <path d="M12 12H2v10h10V12Z" />
                     <path d="M22 2h-10v20h10V2Z" />
                   </svg>
                 </div>
                 <div className="flex flex-col">
-                  <span className={`text-xs font-semibold uppercase tracking-wide ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Bot Categories</span>
+                  <span className="text-xs font-semibold uppercase tracking-wide dark:text-gray-400 text-gray-500">Bot Categories</span>
                   <div className="mt-1">
-                    <h3 className={`text-xl sm:text-2xl font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{Object.keys(botTypes).length}</h3>
+                    <h3 className="text-xl sm:text-2xl font-medium dark:text-white text-gray-800">{Object.keys(botTypes).length}</h3>
                   </div>
                 </div>
               </div>
@@ -309,27 +291,27 @@ export default function Dashboard() {
           
           {/* Agent TPU Consumption Section */}
           <div className="mb-6">
-            <h2 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Agent TPU Consumption</h2>
-            <div className={`${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'} border rounded-xl shadow-sm p-6`}>
+            <h2 className="text-lg font-semibold mb-3 dark:text-white text-gray-800">Agent TPU Consumption</h2>
+            <div className="border rounded-xl shadow-sm p-6 dark:bg-neutral-800 dark:border-neutral-700 bg-white border-gray-200">
               <div className="flex justify-between items-center mb-4">
-                <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                <p className="text-sm dark:text-gray-400 text-gray-600">
                   Each agent type has a different average TPU consumption per execution batch:
                 </p>
-                <div className={`text-xs font-medium px-3 py-1 rounded-lg ${darkMode ? 'bg-blue-900 text-blue-300' : 'bg-blue-100 text-blue-800'}`}>
+                <div className="text-xs font-medium px-3 py-1 rounded-lg dark:bg-blue-900 dark:text-blue-300 bg-blue-100 text-blue-800">
                   Based on real usage data
                 </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className={`p-4 rounded-lg border ${darkMode ? 'bg-neutral-700 border-neutral-600' : 'bg-gray-50 border-gray-200'}`}>
+                <div className="p-4 rounded-lg border dark:bg-neutral-700 dark:border-neutral-600 bg-gray-50 border-gray-200">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className={`text-2xl p-2 rounded-lg ${darkMode ? 'bg-neutral-600' : 'bg-gray-100'}`}>🤖</div>
-                    <h3 className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>Customer Support</h3>
+                    <div className="text-2xl p-2 rounded-lg dark:bg-neutral-600 bg-gray-100">🤖</div>
+                    <h3 className="font-medium dark:text-white text-gray-800">Customer Support</h3>
                   </div>
-                  <div className={`text-sm mb-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <div className="text-sm mb-3 dark:text-gray-400 text-gray-600">
                     Handles customer inquiries and support requests
                   </div>
-                  <div className={`w-full bg-gray-200 rounded-full h-2 dark:bg-gray-600 mb-2`}>
+                  <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-600 mb-2">
                     <div className="bg-blue-500 h-2 rounded-full" style={{ width: '38%' }}></div>
                   </div>
                   <div className="flex justify-between items-center">
@@ -337,25 +319,25 @@ export default function Dashboard() {
                       <svg className="size-4 mr-1.5 text-blue-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                       </svg>
-                      <span className={`text-sm font-semibold ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                      <span className="text-sm font-semibold dark:text-blue-400 text-blue-600">
                         270 TPU
                       </span>
                     </div>
-                    <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                    <div className="text-xs dark:text-gray-500 text-gray-500">
                       ~4.5 min/execution
                     </div>
                   </div>
                 </div>
                 
-                <div className={`p-4 rounded-lg border ${darkMode ? 'bg-neutral-700 border-neutral-600' : 'bg-gray-50 border-gray-200'}`}>
+                <div className="p-4 rounded-lg border dark:bg-neutral-700 dark:border-neutral-600 bg-gray-50 border-gray-200">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className={`text-2xl p-2 rounded-lg ${darkMode ? 'bg-neutral-600' : 'bg-gray-100'}`}>🤑</div>
-                    <h3 className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>Finance & Sales</h3>
+                    <div className="text-2xl p-2 rounded-lg dark:bg-neutral-600 bg-gray-100">🤑</div>
+                    <h3 className="font-medium dark:text-white text-gray-800">Finance & Sales</h3>
                   </div>
-                  <div className={`text-sm mb-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <div className="text-sm mb-3 dark:text-gray-400 text-gray-600">
                     Helps with product recommendations and sales
                   </div>
-                  <div className={`w-full bg-gray-200 rounded-full h-2 dark:bg-gray-600 mb-2`}>
+                  <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-600 mb-2">
                     <div className="bg-green-500 h-2 rounded-full" style={{ width: '64%' }}></div>
                   </div>
                   <div className="flex justify-between items-center">
@@ -363,25 +345,25 @@ export default function Dashboard() {
                       <svg className="size-4 mr-1.5 text-green-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                       </svg>
-                      <span className={`text-sm font-semibold ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
+                      <span className="text-sm font-semibold dark:text-green-400 text-green-600">
                         450 TPU
                       </span>
                     </div>
-                    <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                    <div className="text-xs dark:text-gray-500 text-gray-500">
                       ~7.5 min/execution
                     </div>
                   </div>
                 </div>
                 
-                <div className={`p-4 rounded-lg border ${darkMode ? 'bg-neutral-700 border-neutral-600' : 'bg-gray-50 border-gray-200'}`}>
+                <div className="p-4 rounded-lg border dark:bg-neutral-700 dark:border-neutral-600 bg-gray-50 border-gray-200">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className={`text-2xl p-2 rounded-lg ${darkMode ? 'bg-neutral-600' : 'bg-gray-100'}`}>✍️</div>
-                    <h3 className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>Marketing & Content</h3>
+                    <div className="text-2xl p-2 rounded-lg dark:bg-neutral-600 bg-gray-100">✍️</div>
+                    <h3 className="font-medium dark:text-white text-gray-800">Marketing & Content</h3>
                   </div>
-                  <div className={`text-sm mb-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <div className="text-sm mb-3 dark:text-gray-400 text-gray-600">
                     Generates media content and marketing materials
                   </div>
-                  <div className={`w-full bg-gray-200 rounded-full h-2 dark:bg-gray-600 mb-2`}>
+                  <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-600 mb-2">
                     <div className="bg-purple-500 h-2 rounded-full" style={{ width: '100%' }}></div>
                   </div>
                   <div className="flex justify-between items-center">
@@ -389,11 +371,11 @@ export default function Dashboard() {
                       <svg className="size-4 mr-1.5 text-purple-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                       </svg>
-                      <span className={`text-sm font-semibold ${darkMode ? 'text-purple-400' : 'text-purple-600'}`}>
+                      <span className="text-sm font-semibold dark:text-purple-400 text-purple-600">
                         700 TPU
                       </span>
                     </div>
-                    <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                    <div className="text-xs dark:text-gray-500 text-gray-500">
                       ~11.7 min/execution
                     </div>
                   </div>
@@ -401,10 +383,10 @@ export default function Dashboard() {
               </div>
               
               <div className="mt-6 p-4 rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
-                <h4 className={`text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                <h4 className="text-sm font-medium mb-2 dark:text-gray-300 text-gray-700">
                   How to optimize your TPU usage:
                 </h4>
-                <ul className={`text-xs space-y-1 list-disc pl-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                <ul className="text-xs space-y-1 list-disc pl-4 dark:text-gray-400 text-gray-600">
                   <li>Configure agents with specific, focused tasks instead of broad responsibilities</li>
                   <li>Use content templates when possible to reduce generation time</li>
                   <li>Schedule batch operations during off-peak hours</li>
@@ -412,11 +394,11 @@ export default function Dashboard() {
                 </ul>
               </div>
               
-              <div className={`mt-4 flex items-center justify-between`}>
-                <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-600'}`}>
+              <div className="mt-4 flex items-center justify-between">
+                <div className="text-xs dark:text-gray-500 text-gray-500">
                   * TPU consumption is based on real usage data and may vary depending on specific tasks and complexity.
                 </div>
-                <Link to="/subscription-plans" className={`text-xs font-medium ${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}>
+                <Link to="/subscription-plans" className="text-xs font-medium dark:text-blue-400 dark:hover:text-blue-300 text-blue-600 hover:text-blue-700">
                   Upgrade for more TPU credits →
                 </Link>
               </div>
@@ -425,18 +407,17 @@ export default function Dashboard() {
           
           {/* Recent Activity Section */}
           <div className="mb-6">
-            <h2 className={`text-lg font-semibold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Recent Activity</h2>
-            <div className={`${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'} border rounded-xl shadow-sm p-4`}>
-              <div className={`text-center py-10 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+            <h2 className="text-lg font-semibold mb-3 dark:text-white text-gray-800">Recent Activity</h2>
+            <div className="border rounded-xl shadow-sm p-4 dark:bg-neutral-800 dark:border-neutral-700 bg-white border-gray-200">
+              <div className="text-center py-10 dark:text-gray-400 text-gray-500">
                 <p>Your bot activity will appear here</p>
-                <Link to="/onboarding" className={`inline-block mt-2 py-2 px-4 rounded-lg ${darkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} text-white transition-colors`}>
+                <Link to="/onboarding" className="inline-block mt-2 py-2 px-4 rounded-lg dark:bg-blue-600 dark:hover:bg-blue-700 bg-blue-500 hover:bg-blue-600 text-white transition-colors">
                   Create New Bot
                 </Link>
               </div>
             </div>
           </div>
-        </main>
-      </div>
+      </main>
     </div>
   );
 } 

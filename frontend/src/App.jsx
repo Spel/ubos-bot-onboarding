@@ -40,14 +40,10 @@ function App() {
     console.log('Auth check - email:', email);
     console.log('Auth check - isAuthenticated:', isAuthenticated);
     
-    // User is logged in if any of these conditions are true
-    const loggedIn = !!(userEmail || email || isAuthenticated);
+    // User is logged in if the authentication flag is true
+    // This is stricter than the previous implementation
+    const loggedIn = isAuthenticated === true;
     setIsLoggedIn(loggedIn);
-    
-    // Ensure authentication state is consistent
-    if (loggedIn && !isAuthenticated) {
-      saveToStorage(STORAGE_KEYS.IS_AUTHENTICATED, true);
-    }
     
     setLoading(false);
     return loggedIn;
@@ -89,7 +85,8 @@ function App() {
   
   // Protected route component that checks authentication
   const ProtectedRoute = () => {
-    return isLoggedIn ? <Outlet /> : <Navigate to="/login" />;
+    console.log("Protected route check - isLoggedIn:", isLoggedIn);
+    return isLoggedIn ? <Outlet /> : <Navigate to="/login" replace />;
   };
 
   return (
@@ -101,8 +98,8 @@ function App() {
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/product" element={<ProductLanding />} />
         
-        {/* Protected routes with layout */}
-        <Route element={<AppLayout />}>
+        {/* Protected routes with layout - Use ProtectedRoute to guard access */}
+        <Route element={isLoggedIn ? <AppLayout /> : <Navigate to="/login" replace />}>
           <Route path="/home" element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/my-bots" element={<MyBots />} />
@@ -128,7 +125,7 @@ function App() {
         </Route>
         
         {/* Fallback route */}
-        <Route path="*" element={<Navigate to={isLoggedIn ? "/home" : "/login"} />} />
+        <Route path="*" element={<Navigate to={isLoggedIn ? "/home" : "/login"} replace />} />
       </Routes>
     </Router>
   );

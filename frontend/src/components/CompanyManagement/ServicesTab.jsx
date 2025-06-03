@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 
 const ServicesTab = ({ 
-  darkMode, 
-  companyData, 
+  darkMode,   companyData, 
   setCompanyData
 }) => {
   const [newService, setNewService] = useState({

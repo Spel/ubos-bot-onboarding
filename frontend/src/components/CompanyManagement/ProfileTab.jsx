@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 
 const ProfileTab = ({ 
-  darkMode, 
   companyData, 
   setCompanyData
 }) => {
@@ -44,14 +43,14 @@ const ProfileTab = ({
 
   return (
     <div className="space-y-6">
-      <div className={`p-6 rounded-xl ${darkMode ? 'bg-neutral-800' : 'bg-white'} shadow-sm`}>
-        <h2 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Company Profile</h2>
+      <div className="p-6 rounded-xl bg-white dark:bg-neutral-800 shadow-sm">
+        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Company Profile</h2>
         
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             {/* Logo Selection */}
             <div>
-              <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
+              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
                 Logo
               </label>
               <div className="flex flex-wrap gap-3">
@@ -62,8 +61,8 @@ const ProfileTab = ({
                     onClick={() => handleLogoSelect(logo)}
                     className={`w-10 h-10 text-xl flex items-center justify-center rounded-lg ${
                       companyData.logo === logo 
-                        ? (darkMode ? 'bg-blue-600' : 'bg-blue-500') 
-                        : (darkMode ? 'bg-neutral-700 hover:bg-neutral-600' : 'bg-gray-100 hover:bg-gray-200')
+                        ? 'bg-blue-500 dark:bg-blue-600' 
+                        : 'bg-gray-100 hover:bg-gray-200 dark:bg-neutral-700 dark:hover:bg-neutral-600'
                     }`}
                   >
                     {logo}
@@ -74,15 +73,11 @@ const ProfileTab = ({
             
             {/* Public URL */}
             <div>
-              <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
+              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
                 Public URL
               </label>
               <div className="flex items-center">
-                <span className={`px-3 py-2 rounded-l-lg border-y border-l ${
-                  darkMode 
-                    ? 'bg-neutral-700 border-neutral-600 text-gray-300' 
-                    : 'bg-gray-100 border-gray-300 text-gray-500'
-                }`}>
+                <span className="px-3 py-2 rounded-l-lg border-y border-l bg-gray-100 border-gray-300 text-gray-500 dark:bg-neutral-700 dark:border-neutral-600 dark:text-gray-300">
                   company.ubos.tech/
                 </span>
                 <input
@@ -90,11 +85,7 @@ const ProfileTab = ({
                   name="publicUrl"
                   value={companyData.publicUrl}
                   onChange={handleChange}
-                  className={`flex-1 px-3 py-2 rounded-r-lg border ${
-                    darkMode 
-                      ? 'bg-neutral-700 border-neutral-600 text-white placeholder-gray-400' 
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                  } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  className="flex-1 px-3 py-2 rounded-r-lg border bg-white border-gray-300 text-gray-900 placeholder-gray-500 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="your-company-name"
                 />
               </div>
@@ -104,7 +95,7 @@ const ProfileTab = ({
           <div className="space-y-4">
             {/* Company Name */}
             <div>
-              <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
+              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
                 Company Name
               </label>
               <input
@@ -113,18 +104,14 @@ const ProfileTab = ({
                 value={companyData.name}
                 onChange={handleChange}
                 required
-                className={`w-full px-3 py-2 rounded-lg border ${
-                  darkMode 
-                    ? 'bg-neutral-700 border-neutral-600 text-white placeholder-gray-400' 
-                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                className="w-full px-3 py-2 rounded-lg border bg-white border-gray-300 text-gray-900 placeholder-gray-500 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter company name"
               />
             </div>
             
             {/* Description */}
             <div>
-              <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
+              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
                 Description
               </label>
               <textarea
@@ -132,11 +119,7 @@ const ProfileTab = ({
                 value={companyData.description}
                 onChange={handleChange}
                 rows="3"
-                className={`w-full px-3 py-2 rounded-lg border ${
-                  darkMode 
-                    ? 'bg-neutral-700 border-neutral-600 text-white placeholder-gray-400' 
-                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                className="w-full px-3 py-2 rounded-lg border bg-white border-gray-300 text-gray-900 placeholder-gray-500 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Describe what your company does"
               />
             </div>
@@ -144,18 +127,14 @@ const ProfileTab = ({
           
           <div className="mt-6 flex items-center justify-end gap-3">
             {saveSuccess && (
-              <span className={`text-sm ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
+              <span className="text-sm text-green-600 dark:text-green-400">
                 Profile saved successfully!
               </span>
             )}
             <button
               type="submit"
               disabled={isSaving}
-              className={`px-4 py-2 rounded-lg ${
-                darkMode 
-                  ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                  : 'bg-blue-500 hover:bg-blue-600 text-white'
-              } transition-colors text-sm font-medium flex items-center gap-2`}
+              className="px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white transition-colors text-sm font-medium flex items-center gap-2"
             >
               {isSaving ? (
                 <>
