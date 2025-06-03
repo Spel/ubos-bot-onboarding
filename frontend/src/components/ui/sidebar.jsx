@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { useIsMobile } from "../../hooks/use-mobile";
 import { cn } from "../../lib/utils";
@@ -423,6 +423,9 @@ export function SidebarGroup({ className, ...props }) {
  * Sidebar group label component
  */
 export function SidebarGroupLabel({ className, darkMode, ...props }) {
+  const { state, isMobile } = useSidebar();
+  const isCollapsed = !state.open && !isMobile;
+
   return (
     <div
       data-sidebar="group-label"
@@ -430,6 +433,7 @@ export function SidebarGroupLabel({ className, darkMode, ...props }) {
         "flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium transition-[margin,opacity] duration-200 ease-linear",
         darkMode ? "text-gray-400" : "text-gray-500",
         "group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0",
+        isCollapsed && "hidden", // Hide when sidebar is collapsed
         className
       )}
       {...props}
@@ -478,6 +482,24 @@ export function SidebarMenuButton({
 }) {
   const { state, isMobile } = useSidebar();
   const isCollapsed = !state.open && !isMobile;
+  const [showTooltip, setShowTooltip] = useState(false);
+  const buttonRef = useRef(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ top: 0 });
+
+  // Update tooltip position when button is hovered
+  const updateTooltipPosition = useCallback(() => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setTooltipPosition({
+        top: rect.top + rect.height / 2
+      });
+    }
+  }, []);
+
+  const handleMouseEnter = useCallback(() => {
+    setShowTooltip(true);
+    updateTooltipPosition();
+  }, [updateTooltipPosition]);
 
   const baseClasses = cn(
     "flex items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none transition-all duration-200 ease-in-out",
@@ -493,11 +515,32 @@ export function SidebarMenuButton({
     className
   );
 
-  // If sidebar is collapsed, only show icon with tooltip
-  if (isCollapsed) {
+  // If sidebar is expanded, just return a regular button with icon and text
+  if (!isCollapsed) {
     return (
-      <div className="relative group w-full flex justify-center">
+      <button
+        data-sidebar="menu-button"
+        data-size={size}
+        data-active={isActive}
+        className={baseClasses}
+        {...props}
+      >
+        {icon}
+        {children}
+      </button>
+    );
+  }
+  
+  // For collapsed sidebar, use React state to control tooltip visibility and position
+  return (
+    <div className="w-full">
+      <div 
+        className="relative flex justify-center items-center h-8 cursor-pointer"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
         <button
+          ref={buttonRef}
           data-sidebar="menu-button"
           data-size={size}
           data-active={isActive}
@@ -506,27 +549,27 @@ export function SidebarMenuButton({
         >
           {icon}
         </button>
-        {tooltip && (
-          <div className="absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 rounded-md bg-black px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
+        
+        {tooltip && isCollapsed && showTooltip && (
+          <div 
+            className={cn(
+              "fixed z-50 rounded-md px-3 py-1.5 text-xs shadow-md",
+              darkMode 
+                ? "bg-neutral-800 text-white border border-neutral-700" 
+                : "bg-white text-gray-900 border border-gray-200"
+            )}
+            style={{
+              animation: 'fadeIn 0.2s ease-in-out forwards',
+              left: '50px', // Position closer to the sidebar
+              top: `${tooltipPosition.top}px`,
+              transform: 'translateY(-50%)'
+            }}
+          >
             {tooltip}
           </div>
         )}
       </div>
-    );
-  }
-
-  // Regular button with icon and text
-  return (
-    <button
-      data-sidebar="menu-button"
-      data-size={size}
-      data-active={isActive}
-      className={baseClasses}
-      {...props}
-    >
-      {icon}
-      {children}
-    </button>
+    </div>
   );
 }
 
